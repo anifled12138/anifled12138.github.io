@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue | To be or not to be</title><meta name="author" content="Anifled"><meta name="copyright" content="Anifled"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="收录于 IJCAI 2024                 Abstract本文提出了一种 因果感知的长对话框架（Causal Perception long-term Dialogue framework, CPD）用于解决在长对话中llm的位置偏差（Position Bias，指在模型在处理输入序列时，倾向于优先关注某些特定位置的信息，而忽视其他位置的重要内容，在长文本或对话任务中尤为">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue">
+<meta property="og:url" content="http://anifled12138.github.io/2025/06/05/Dialogue/index.html">
+<meta property="og:site_name" content="To be or not to be">
+<meta property="og:description" content="收录于 IJCAI 2024                 Abstract本文提出了一种 因果感知的长对话框架（Causal Perception long-term Dialogue framework, CPD）用于解决在长对话中llm的位置偏差（Position Bias，指在模型在处理输入序列时，倾向于优先关注某些特定位置的信息，而忽视其他位置的重要内容，在长文本或对话任务中尤为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://anifled12138.github.io/img/Hazel.jpg">
+<meta property="article:published_time" content="2025-06-05T04:28:02.000Z">
+<meta property="article:modified_time" content="2025-06-05T09:09:41.798Z">
+<meta property="article:author" content="Anifled">
+<meta property="article:tag" content="causal debias">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://anifled12138.github.io/img/Hazel.jpg"><link rel="shortcut icon" href="/img/bitbug_favicon.ico"><link rel="canonical" href="http://anifled12138.github.io/2025/06/05/Dialogue/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'position'
+}</script><link rel="stylesheet" href="/css/background.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="not-home-page" id="page-header" style="background-color: rgb(0,0,0);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">To be or not to be</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="page-site-info"><h1 id="site-title">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</h1></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div>
+  <span style="float: left;">收录于 <strong><em>IJCAI 2024</em></strong></span>
+  <a href="https://arxiv.org/pdf/2406.02002.pdf" target="_blank" style="float: right;">
+    <img src="/images/icons8-pdf-40.png" alt="PDF" width="40">
+  </a>
+  <div style="clear: both;"></div>
+</div>
+
+<h1 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h1><p>本文提出了一种 <em><strong>因果感知的长对话框架</strong></em>（Causal Perception long-term Dialogue framework, CPD）用于解决在长对话中llm的<em><strong>位置偏差</strong></em>（Position Bias，指在模型在处理输入序列时，倾向于优先关注某些特定位置的信息，而忽视其他位置的重要内容，在长文本或对话任务中尤为明显）。这一偏差导致模型过度地关注虚假的位置相关性，而非真正的因果相关的话语。</p>
+<img src="/images/image-20250605132928174.png" alt="image-20250605132928174" style="zoom: 67%;" />
+
+
+
+<h2 id="主要工作："><a href="#主要工作：" class="headerlink" title="主要工作："></a>主要工作：</h2><ul>
+<li>提出一种基于因果扰动的话语提取方法，结合局部位置感知机制，能够有效避免LLM的位置信息干扰</li>
+<li>提出一种因果感知微调策略，显著缓解模型的“位置偏差”问题，提升模型在对话中捕捉因果关系的能力</li>
+</ul>
+<p><strong>baseline</strong>：</p>
+<p><strong>dataset</strong>：CGDIALOG</p>
+<p><strong>基础模型</strong>：Llama2-7B-chat</p>
+<h1 id="Method"><a href="#Method" class="headerlink" title="Method"></a>Method</h1><p><strong>处理效应</strong>（Treatment Effect,TE）用于量化某个变量对结果的影响，通常通过条件独立性假设和反事实推理进行评估。对于发言u<sub>i</sub>，用二元处理设定来评估其对回复结果的处理效应。</p>
+<p>对发言u<sub>i</sub>的TE定义如下：<br>$$<br>TE(u_i) &#x3D; f(D) - f(D \setminus u_i)<br>$$<br>D\u<sub> i</sub>表示对话中去除该发言后的情形，函数f(·)表示llm生成正确回复的困扰度（perplexity，[Horgan, 1995]），为了排除去除发言后其他变量改变可能带来的影响，使用一些长度相近但是无实际意义的发言（如hello、thank you等）替换u<sub>i</sub>，构造反事实处理状态。</p>
+<img src="/images/image-20250605170240734.png" alt="image-20250605170240734" style="zoom: 50%;" />
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/causal-debias/">causal debias</a></div><div class="post-share"><div class="social-share" data-image="/img/Hazel.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav id="pagination"><div class="pagination"></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Anifled</div><div class="author-info-description">我与我 周旋久</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"/></a><div class="content"><a class="title" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</a><time datetime="2025-06-05T04:28:02.000Z" title="发表于 2025-06-05 12:28:02">2025-06-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/04/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" title="面向对象-方法"><img src="/img/Subu.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="面向对象-方法"/></a><div class="content"><a class="title" href="/2025/06/04/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" title="面向对象-方法">面向对象-方法</a><time datetime="2025-06-04T09:32:08.000Z" title="发表于 2025-06-04 17:32:08">2025-06-04</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Papers/"><span class="card-category-list-name">Papers</span><span class="card-category-list-count">1</span></a></li>
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/Java/" style="font-size: 1.1em; color: #999">Java</a> <a href="/tags/%E5%85%A5%E9%97%A8/" style="font-size: 1.1em; color: #999">入门</a> <a href="/tags/causal-debias/" style="font-size: 1.1em; color: #999">causal debias</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      
+    </div>
+  
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2025/06/">
+            <span class="card-archive-list-date">
+              六月 2025
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">2</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-06-06T14:57:13.469Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgb(219,255,253);"><div id="footer-wrap"><div class="copyright">&copy;2025 By Anifled</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text">作者：<strong>anifled</strong>，转载请注明作者。<a target="_blank" rel="noopener" href="https://github.com/anifled12138">GitHub</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
