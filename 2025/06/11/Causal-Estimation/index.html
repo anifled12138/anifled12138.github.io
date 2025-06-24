@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Causal Estimation of Memorisation Profiles | To be or not to be</title><meta name="author" content="Anifled"><meta name="copyright" content="Anifled"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="收录于 ACL 2024 best papers                Abstract 之前的研究将“记忆”定义为在训练中使用某个实例对模型预测该实例能力所产生的因果效应。 这一定义依赖于反事实：能观察到如果模型未见过该实例会发生什么情况。 模型可能存储或“记忆”了关于个别训练样本的精确知识。一些先前的研究采用了因果定义来理解记忆：即，在训练过程中观察某个样本对模型正确预测该样本能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Causal Estimation of Memorisation Profiles">
+<meta property="og:url" content="http://anifled12138.github.io/2025/06/11/Causal-Estimation/index.html">
+<meta property="og:site_name" content="To be or not to be">
+<meta property="og:description" content="收录于 ACL 2024 best papers                Abstract 之前的研究将“记忆”定义为在训练中使用某个实例对模型预测该实例能力所产生的因果效应。 这一定义依赖于反事实：能观察到如果模型未见过该实例会发生什么情况。 模型可能存储或“记忆”了关于个别训练样本的精确知识。一些先前的研究采用了因果定义来理解记忆：即，在训练过程中观察某个样本对模型正确预测该样本能">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://anifled12138.github.io/img/Hazel.jpg">
+<meta property="article:published_time" content="2025-06-11T12:33:39.000Z">
+<meta property="article:modified_time" content="2025-06-23T09:19:14.000Z">
+<meta property="article:author" content="Anifled">
+<meta property="article:tag" content="causal debias">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://anifled12138.github.io/img/Hazel.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Causal Estimation of Memorisation Profiles",
+  "url": "http://anifled12138.github.io/2025/06/11/Causal-Estimation/",
+  "image": "http://anifled12138.github.io/img/Hazel.jpg",
+  "datePublished": "2025-06-11T12:33:39.000Z",
+  "dateModified": "2025-06-23T09:19:14.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Anifled",
+      "url": "http://anifled12138.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/bitbug_favicon.ico"><link rel="canonical" href="http://anifled12138.github.io/2025/06/11/Causal-Estimation/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Causal Estimation of Memorisation Profiles',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/background.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/Hazel.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">To be or not to be</span></a><a class="nav-page-title" href="/"><span class="site-name">Causal Estimation of Memorisation Profiles</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Causal Estimation of Memorisation Profiles</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-11T12:33:39.000Z" title="发表于 2025-06-11 20:33:39">2025-06-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-06-23T09:19:14.000Z" title="更新于 2025-06-23 17:19:14">2025-06-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Papers/">Papers</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div>
+  <span style="float: left;">收录于 <strong><em>ACL 2024 best papers</em></strong></span>
+  <a href="https://aclanthology.org/2024.acl-long.834.pdf" target="_blank" style="float: right;">
+    <img src="/images/icons8-pdf-40.png" alt="PDF" width="40">
+  </a>
+  <div style="clear: both;"></div>
+</div>
+<h1>Abstract</h1>
+<p><strong>之前的研究将“记忆”定义为在训练中使用某个实例对模型预测该实例能力所产生的因果效应。</strong></p>
+<p>这一定义依赖于反事实：能观察到如果模型未见过该实例会发生什么情况。</p>
+<p>模型可能存储或“记忆”了关于个别训练样本的精确知识。一些先前的研究采用了因果定义来理解记忆：即，在训练过程中观察某个样本对模型正确预测该样本能力所产生的因果效应。观念直观，但不容易量化需要反事实案例——我们需要知道没有被训练过这个样本，LLM会表现为什么样子。</p>
+<p>作者首先将反事实记忆形式化为两种潜在结果之间的差异，作者推广了以往对记忆的定义，是我们能够在统一框架下比较不同的定义。使用观测数据来估计记忆，只需要模型在整个训练过程中对一小部分训练数据的表现指标。方法的输出被称为“记忆特征”：即模型在训练过程中对各个训练批次的记忆程度。</p>
+<p>本文提出了一种基于计量经济学中“差分法”设计的新方法，以原理清晰高效的的方式估计记忆趋势，仅需要观察模型在训练过程中对少量实例的表现，</p>
+<ol>
+<li>更大的模型表现出更强且更持久的记忆；</li>
+<li>记忆程度受数据顺序和学习率的影响；</li>
+<li>不同规模模型之间的记忆趋势具有一致性，因此可以通过小模型预测大模型的记忆行为。</li>
+</ol>
+<p><strong>Dataset</strong>：Pile</p>
+<p><strong>Baseline</strong>：</p>
+<p><strong>LLM</strong>：Pythia</p>
+<h1>Background</h1>
+<h2 id="语言建模">语言建模</h2>
+<p>设$$p_\theta(x)$$是一个参数为$$\theta \in \mathbb{R}^d$$的语言模型，该模型定义了所有可以从字母表V中的元素构造出的有限序列集合$$x \in V^*$$上的概率分布，从一组随机选择的初始参数$$\theta_0$$开始，使用一个数据集D和一个基于损失函数L定义的优化过程来学习参数θ。设$$D = { x_n }<em>{n=1}^{N}$$是一个数据集，其中每个样本x是从目标分布p(x)中采样的序列。假设这些样本是独立同分布，并通过一个排列函数$$\sigma: {1, \ldots, N} \to {1, \ldots, N}$$进行打乱，给定一个批大小B，将这个数据集划分为$$T \leq \left\lfloor \frac{N}{B} \right\rfloor$$个批次$$B_t$$，然后依次对这些批次进行迭代，并对模型参数执行梯度更新：<br>
+$$<br>
+\theta_t = \theta</em>{t-1} - \eta \nabla_{\theta} L(\theta_{t-1}, B_t)<br>
+$$<br>
+其中$\eta∈R$是学习率。这种训练方式是对训练集的一次完整遍历，也是近期语言模型的标准做法。</p>
+<p>在每次迭代时，使用一个批次$B_t$得到一个新的模型检查点$\theta_t$，引入一种记号来区分检查点与批次的索引。用$c∈{0,1, \ldots ,T}$表示检查点步数（如$\theta_c$）。此外，用$g \in {1, \ldots, T} \cup {\infty}$表示某个批次用于训练的时间步（例如$B_g$），将其称为“处理时间步”。将$g=∞$表示由为用于训练、仅用于验证的实例组成的批次，即验证集。</p>
+<h2 id="因果分析">因果分析</h2>
+<p>因果分析通常分为三个步骤：</p>
+<ol>
+<li>定义一个因果估计目标（causal estimand），也就是我们希望估计的目标量；</li>
+<li>将这个因果估计目标转化为可观测数据所需的假设，从而定义一个统计估计目标（statistical estimand），这个过程被称为识别；</li>
+<li>定义一个估计器（estimator），即用来近似统计估计目标的统计方法。</li>
+</ol>
+<p>为了将记忆定义为一个因果估计目标，作者使用Rubin提出的潜在结果框架。对x的训练定义了“处理”，而模型对该实例的预测能力定义了“结果”。</p>
+<p>由于训练是按批次逐步进行的，因此不同的实例会在不同的时间步受到处理。作者使用了一个处理分配变量G(x)来表示某个实例是在哪一步g被训练的。为了量化参数为$\theta_c$的模型对x的预测能力，使用一个性能函数 $γ$。定义结果变量为：<br>
+$$<br>
+Y_c(x) \triangleq \gamma(\theta_c, x)<br>
+$$<br>
+将此性能函数设为x在$p_{\theta c}$下的对数似然：<br>
+$$<br>
+\gamma(\theta_c, x) = \log p_{\theta_c}(x)<br>
+$$<br>
+要定义“记忆”，需要同时考虑观察到的结果（即 $Y_c(x)$ ）和反事实结果（即如果我们没有训练该实例时模型在该实例上的表现）。潜在结果记号（Splawa-Neyman, 1923）使我们能够一致地表示这两种类型的结果。</p>
+<p><strong>定义1：</strong></p>
+<p>在时间步c、处理分配为g的情况下，实例x的潜在结果记作$Y_c(x;g)$，表示如果$G(x)=g$，那么结果变量所应具有的值。</p>
+<p>由于只观察到了一次数据的排列，因此对于每个实例x，我们只能看到一个特定的处理时间步G(x)。因此，只有当处理分配g=G(x)时，我们才能观察到该实例的潜在结果。在这种情况下，我们可以将潜在结果等同于观察结果，即</p>
+<p>$ Y_c(x;g)=Y_c(x) $，该性质称为一致性。而对于任何其他处理时间步g≠G(x)，潜在结果都是反事实的，incident无法从数据中直接观测到。</p>
+<h1>Method</h1>
+<h2 id="反事实记忆">反事实记忆</h2>
+<p>反事实记忆可以理解为对以下问题的回答：</p>
+<p><code>&quot;如果我们在时间步 g 没有训练实例 x ，那么在时间步 c 模型对该实例的表现会有什么不同？ &quot;</code></p>
+<p><strong>定义2</strong>：</p>
+<h2 id="反事实记忆是指在观测到的时间步G-x-g对实例x进行训练，对模型在时间步c上对该统一实例表现所产生的因果效应：-tau-x-c-overset-text-def-underbrace-Y-c-x-g-text-训练时包含-x-时在-x-上的表现"><em>反事实记忆是指在观测到的时间步G(x)=g对实例x进行训练，对模型在时间步c上对该统一实例表现所产生的因果效应</em>：<br>
+$$<br>
+\tau_{x,c} \overset{\text{def}}{=}<br>
+\underbrace{Y_c(x; g)}_{\text{训练时包含 $x$ 时在 $x$ 上的表现}}</h2>
+<p>\underbrace{Y_c(x; \infty)}_{\text{未见过 $x$ 时在 $x$ 上的表现}}<br>
+$$<br>
+公式2被称为个体处理效应（Individual Treatment Effect, ITE），该式中的第一个潜在结果$ Y_c(x;g)$时可以从数据中观察到的，因为我们在时间步G(x)=g训练了该实例。然而，第二项 $Y_c(x;∞)$ 是<strong>反事实的</strong> 。要计算这个ITE，我们需要估计特定实例的反事实结果，但由于未观测因素和异质性，这在实践中具有挑战性。</p>
+<p>尽管理想情况下希望在单个实例层面估计记忆程度，但出于计量经济学文献常见做法，我们关注平均效应。</p>
+<p><strong>定义3：</strong></p>
+<p><em>预期反事实记忆是指在时间步 g 使用某些实例进行训练，对模型在时间步 c 上对这些相同实例表现所产生的平均因果效应</em>：<br>
+$$<br>
+\tau_{g,c} \overset{\text{def}}{=} \mathbb{E}<em>x \left[ Y_c(x; g) - Y_c(x; \infty) \mid G(x) = g \right]<br>
+$$<br>
+异质性指的是不同样本对训练的反应可能不用。所有$\tau</em>{g,c}$组成一个举证，称为模型的记忆特征，其中每一行代表一个批次的记忆路径。记忆特征与记忆路径是我们能够分析模型在不同处理时间步与检查点时间步下的记忆模式。</p>
+<p>当c&lt;g时，不可能存在记忆，因此此时模型尚未见过这些实例，因此在这种情况下$\tau_{g,c}=0$.</p>
+<ul>
+<li>当 <em>c</em>=<em>g</em> 时的 $\tau_{g,c}$称为<strong>即时记忆</strong> （instantaneous memorisation），模型刚训练完该样本就表现出记忆;</li>
+<li>当 <em>c</em>&gt;<em>g</em> 时的$\tau_{g,c}$ 称为<strong>持续记忆</strong> （persistent memorisation），在后续时间步仍保持对该样本的记忆;</li>
+<li>当 <em>c</em>=<em>T</em> 时的 $\tau_{g,c}$ 称为<strong>残余记忆</strong> （residual memorisation），最终模型仍然记得该样本。</li>
+</ul>
+<h2 id="记忆的估计">记忆的估计</h2>
+<h2 id="将记忆定义在处理时间步-g-层面的实际含义是：我们只能对在同一时间步被训练的样本组-（即批次-B-g-）做出因果推断，而不能针对单个实例进行。-begin-equation-tau-g-c-underbrace-mathbb-E-x-left-Y-c-x-g-mid-G-x-g-right-1">将记忆定义在处理时间步 <em>g</em> 层面的实际含义是：我们只能对在<strong>同一时间步被训练的样本组</strong> （即批次 $B_g$ ）做出因果推断，而不能针对单个实例进行。<br>
+$$<br>
+\begin{equation}<br>
+\tau_{g,c} =<br>
+\underbrace{\mathbb{E}<em>x \left[ Y_c(x; g) \mid G(x)=g \right]}</em>{1}</h2>
+<p>\underbrace{\mathbb{E}<em>x \left[ Y_c(x; \infty) \mid G(x)=g \right]}</em>{2}<br>
+\end{equation}<br>
+$$<br>
+<strong>项 1</strong> 可以直接从数据中估计，因为批次 $B_g$ 中的样本都满足 G(x)=g ，我们可以利用一致性假设，将 $Y_c(x;g)$ 等同于观察到的结果 $Y_c(x)$。</p>
+<p>定义一个批次中所有样本的平均表现为：<br>
+$$<br>
+\begin{equation}<br>
+Y_c(g) \overset{\text{def}}{=} \frac{1}{|B_g|} \sum_{x \in B_g} Y_c(x)<br>
+\end{equation}<br>
+$$<br>
+<strong>项 2</strong> 是反事实的：我们无法观察那些“从未被训练”的情况下模型的表现$Y_c(x;∞)$ 。</p>
+<p>因果估计目标中包含反事实潜在结果，这使得估计变得困难，这也是因果推理中的<strong>基本难题</strong> 。因此，因果方法的目标就是通过可观测的数据去估计这些反事实结果，通常依赖于可比的样本组。</p>
+<h3 id="差分估计器（Difference-Estimator）">差分估计器（Difference Estimator）</h3>
+<p>第一个估计记忆的方法，只需要验证集上观察结果，但依赖于一个较强的识别假设。</p>
+<p><strong>假设1</strong>：</p>
+<p>实例x是独立同分布地从p(x)中采样的，并被随机分配到不同的处理组g。在此假设下，有：<br>
+$$<br>
+\begin{equation}<br>
+\tau^{\text{diff}}_{g,c} = \mathbb{E}_x \left[ Y_c(x; g) \mid G(x)=g \right] - \mathbb{E}_x \left[ Y_c(x; \infty) \mid G(x)=\infty \right]<br>
+\end{equation}<br>
+$$<br>
+<strong>与公式 (3) 不同的是，这里的第二项不是反事实——它是验证集实例$B_∞$ 的期望观测结果。</strong></p>
+<p>使用如下估计器：</p>
+<p>估计器1（差分估计器）：<br>
+$$<br>
+\begin{equation}<br>
+\tau^{\text{diff}}_{g,c} = Y_c(g) - Y_c(\infty)<br>
+\end{equation}<br>
+$$<br>
+在假设成立的情况下，这是一个无偏估计器。</p>
+<p>即使假设 1 成立，上述公式 要想具有低方差，也需要足够大的样本量来计算 $Y_c(g)$ 和 $Y_c(∞)$ 。然而，考虑到当前最先进的语言模型及其训练集的规模，为所有实例 <em>x</em> 和检查点 <em>c</em> 提取性能指标$Y_c(x)$在计算和内存上都非常昂贵。</p>
+<h3 id="差分中的差分估计器">差分中的差分估计器</h3>
+<p>作者现在引入了一种基于“差分中的差分”（Difference-in-Differences, DiD）设计因果估计器，DiD的核心思想是利用时间维度来辅助设别，通过比较受训样本与未受训样本在时间趋势上的差异，来识别因果效应。</p>
+<p>DiD 基于以下假设：如果没有被用于训练，不同批次在模型表现上的变化趋势应该是相似的。</p>
+<p><strong>假设 2（平行趋势）</strong> ：</p>
+<h1>在没有训练的情况下，模型在不同检查点之间的表现变化趋势对于不同处理组是相同的。即对于任意c,c’≥g-1：<br>
+$$<br>
+\begin{equation}<br>
+\mathbb{E}<em>x \left[ Y_c(x; \infty) - Y</em>{c’}(x; \infty) \mid G(x)=g \right]</h1>
+<p>\mathbb{E}<em>x \left[ Y_c(x; \infty) - Y</em>{c’}(x; \infty) \mid G(x)=\infty \right]<br>
+\end{equation}<br>
+$$<br>
+在应用DiD设计之前，还需要第二个假设：</p>
+<p><strong>假设3（无预期效应）</strong>：</p>
+<p>训练在发生之前不会产生影响，即对任意c&lt;g：<br>
+$$<br>
+\begin{equation}<br>
+\mathbb{E}_x \left[ Y_c(x; g) \mid G(x)=g \right] = \mathbb{E}_x \left[ Y_c(x; \infty) \mid G(x)=g \right]<br>
+\end{equation}<br>
+$$<br>
+<em><strong>（c是检查时间步，g是训练时间步，在未被训练之前，在样本被训练之前，模型对他们的表现应该和从未被训练过一样。）</strong></em></p>
+<p>有：</p>
+<ul>
+<li>$Y_c(x;∞),Y_{g−1}(x;∞)$ 在验证集上可观测；</li>
+<li>$Y_{g−1}(x;g)$在训练集上可观测。</li>
+</ul>
+<p>由此可以得到以下统计估计目标：<br>
+$$<br>
+\begin{equation}<br>
+\tau^{\text{did}}_{g,c} = \mathbb{E}<em>x \left[ Y_c(x; g) - Y</em>{g-1}(x; g) \mid G(x)=g \right] - \mathbb{E}<em>x \left[ Y_c(x; \infty) - Y</em>{g-1}(x; \infty) \mid G(x)=\infty \right]<br>
+\end{equation}<br>
+$$</p>
+<p>由此得到以下DiD估计器：</p>
+<p><strong>估计器2（DiD估计器）</strong>：<br>
+$$<br>
+\begin{equation}<br>
+\tau^{\text{did}}<em>{g,c} = \left( Y_c(g) - Y</em>{g-1}(g) \right) - \left( Y_c(\infty) - Y_{g-1}(\infty) \right)<br>
+\end{equation}<br>
+$$<br>
+DiD估计器所依赖的假设更弱，且在温和条件下具有比公式7中差分估计器更低的方差。</p>
+<p><strong>能这么做的原因是作者假设在不同的样本上面，我们的趋势是一致的，所以在训练集和验证集上面去观察在g时的趋势。</strong></p>
+<p><strong>差分估计器是比较训练组和验证组在同一时间点的表现；</strong></p>
+<p><strong>DiD估计器是比较两组在两个时间点之间的趋势差异。</strong></p>
+<h2 id="记忆的定义">记忆的定义</h2>
+<h3 id="反事实记忆的已有操作化定义">反事实记忆的已有操作化定义</h3>
+<p>令ψ 是一个变量向量，用于表示训练过程中的随机性来源，例如由排列函数 σ 引起的数据顺序变化、以及初始参数 $θ_0$ 。通过定义这些变量上的分布 p(ψ) ，我们可以如下定义架构层面的记忆。</p>
+<p><strong>定义4</strong>：</p>
+<p>当对训练变量ψ进行边缘化时，反事实记忆$τ_{x,T}$，被定义为：<br>
+$$<br>
+\begin{equation}<br>
+\tau_{x,p(\psi)} \overset{\text{def}}{=}<br>
+\mathbb{E}<em>\psi \left[ \tau</em>{x,T} \mid G(x)=\infty \right]<br>
+= \mathbb{E}_\psi \left[ Y_T(x; G(x)) - Y_T(x; \infty) \mid G(x)=\infty \right]<br>
+\end{equation}<br>
+$$<br>
+其中第一个潜在结果中的G(x)取决于打乱函数σ将x分配到哪个批次。</p>
+<p>最简单估计这个值的方法：在包含或不包含x的数据集上分别训练多个模型，并用这些模型去近似上述期望——但是计算成本高，且：</p>
+<ul>
+<li>它无法提供关于检查点步数或处理步数对记忆影响的洞察；这是因为 <em>T</em> 被硬编码进 $τ_{x,p(ψ)}$ 的定义中，并且它对数据排列进行了边缘化。虽然可以将该定义推广到其他检查点步数 <em>c</em> 或特定的 <em>g</em> ，但以往研究主要关注这些特定选择，忽略了训练动态对记忆的影响。</li>
+<li>也许更重要的是，对 <em>p</em>(<em>ψ</em>) 进行边缘化意味着该指标衡量的是<strong>模型架构</strong> 的记忆能力，而不是<strong>具体模型实例</strong> 的记忆能力。</li>
+</ul>
+<h3 id="影响函数">影响函数</h3>
+<p>影响函数用于在不重新训练模型的前提下，估计如果从训练集中移除某个样本x，模型参数会如何变化。</p>
+<p>新的参数集合可以通过以下方式近似：<br>
+$$<br>
+\begin{equation}<br>
+\theta_{-x,T} \approx \theta_T + \frac{1}{N} H^{-1}<em>\theta \nabla</em>\theta L(\theta_T, x)<br>
+\end{equation}<br>
+$$<br>
+其中$H_\theta$是损失函数L在$\theta_T$处的海森矩阵。</p>
+<p>该近似居于围绕$\theta_T$的一阶泰勒展开，并在以下假设下误差较小：</p>
+<ol>
+<li>损失函数在 <em>θ</em> 上严格凸；</li>
+<li>海森矩阵$H_\theta$是正定矩阵；</li>
+<li>模型已经收敛（即梯度为零）。</li>
+</ol>
+<p>在这些假设下，影响函数可用于高效的估计反事实项$Y_T(x;∞) $，即如果没有训练过x时的表现。</p>
+<p>可以使用更新后的参数来测量模型表现：<br>
+$$<br>
+\begin{equation}<br>
+\hat{\tau}^{\text{infl}}<em>{x,T} = Y_T(x) - Y</em>{-x,T}(x)<br>
+\end{equation}<br>
+$$<br>
+并设定$ Y_T(x;∞)=Y_{−x,T(x)}$，记忆的影响函数估计器可写为：<br>
+$$<br>
+\begin{equation}<br>
+\hat{\tau}^{\text{infl}}<em>{x,T} = Y_T(x) - Y</em>{-x,T}(x)<br>
+\end{equation}<br>
+$$<br>
+影响函数提供了一种计算效率较高的方法来估计实例级别的反事实记忆。然而，语言模型通常并不满足上述任一假设，这可能导致该估计器出现严重偏差。</p>
+<h3 id="可提取记忆">可提取记忆</h3>
+<p>将 记忆定义为(<em>k,l)-可提取性</em>(extractability)：如果给定一个长度为k的前缀，模型能正确预测接下来的l的token，则在字符串是*(k,l)-可提取性*。</p>
+<p>作者假设可提取记忆本质上是一种反事实记忆的估计器。</p>
+<p>设性能函数 <em>γ</em>衡量一个字符串是否是*(k,l)-可提取性*，再假设在未训练的情况下，一个字符串不是*(k,l)-可提取性*的，即$Y_c(x;∞) =0$。在这一假设下，可以定义一个可提取记忆估计器为：<br>
+$$<br>
+\begin{equation}<br>
+\tau^{\text{extr}}_{x,c} = Y_c(x)<br>
+\end{equation}<br>
+$$<br>
+可提取记忆隐含地假设$Y_c(x;∞) =0$，而反事实记忆则明确控制这一反事实项，值得注意的是，在字符串较长且复杂的情况下，这一假设可能是合理的 ，因为这种情况下，该字符串出现在模型top-1 beam（贪婪解码输出）中的概率趋近于零。但对于较短或结构简单的序列，这一假设可能并不成立，相反可能导致结果混淆了<strong>记忆</strong>和<strong>预测难度</strong>两个因素。</p>
+<h1>Experiment</h1>
+<h2 id="Pythia套件">Pythia套件</h2>
+<p>作者使用公开可用的Pythia模型套件，其中包含8个不同大小的Transformer模型，规模参数在70M到12B不等。在Pile数据集上训练，这是一个包含3000亿token的英文文档集合。所有模型使用相同的数据进行训练，数据集被打乱并打包成长度为2049的序列，每个这样的序列对应一个实例x。训练过程中使用了带有warm-up的余弦学习率调度器，并采用1024个序列的批量大小，最终进行了143000次优化步骤。</p>
+<p>使用去重后的 Pile 数据集版本来减少因重复导致的虚假记忆模式。去重后的数据集包含 2070 亿 token，因此使用这个版本的模型需要训练大约 1.5 个 epoch，以保持与未去重版本相同的 token 数量。我们考虑的是第一个 epoch 内的检查点（即最多到第 95,000 步）。</p>
+<h2 id="创建面板数据">创建面板数据</h2>
+<p>考虑Pile数据集的规模，在所有实例上进行评估在计算上不可行，因此只对数据进行子采样。</p>
+<p>现有检查点的时间粒度（1000步）不允许考虑每一个时间步，因此我们只考虑步数$c∈ { 0,1k,…,95k}$和处理时间步$g∈ { 0,1k,…,95k}$。为了匹配检查点频率，我们将两个检查点之间的所有批次认为在同一时间步被模型观察到，称之宏批次。</p>
+<p>为了获得每个宏批次的足够评估次数，作者分两步从训练集中采样实例：首先随机选择每个宏批次的10个批次，然后从每个批次中再采样10个实例。这一过程最终得到14300个训练实例。作者还在验证集中采样2000个实例用于构建未参与训练的宏批次。最终得到了一个包含16,300 个实例、在 96 个时间步上评估的面板数据。</p>
+<p>性能指标使用的是序列级别的对数似然：<br>
+$$<br>
+\gamma(\theta, x) = \log p_\theta(x)<br>
+$$</p>
+<h2 id="统计推断">统计推断</h2>
+<p>为了计算统计显著性，采用简单乘数引导程序，该程序返回所有记忆估计值的同时置信区间，考虑到宏批次和检查点步数之间的依赖关系，从而避免多重检验问题。</p>
+<h1>Results</h1>
+<p><img src="/images/image-20250613110124525.png" alt="image-20250613110124525"></p>
+<p><img src="/images/image-20250613110134218.png" alt="image-20250613110134218"></p>
+<h2 id="即时记忆">即时记忆</h2>
+<p>即时记忆估计值（在第 3 节中定义为$\tau_{g,c}$当 <em>g</em>=<em>c</em> 时）显示在图 2 的记忆特征对角线上，并也在图 3 中展示。从这些估计值中，我们可以清楚地观察到处理步数对记忆的影响：训练早期的即时记忆比后期更强。有趣的是（但也许并不令人惊讶），即时记忆与余弦学习率调度密切相关：它在 warm-up 阶段后（大约第 1,500 步）比之前更强。此外，正如预期，即时记忆随着模型规模的增加而增强。</p>
+<p>值得注意的是，我们预计在正常训练的语言模型中总会存在一定程度的即时记忆（尽管可能值很小）。因此它可以用于功效分析（Cohen, 1992）：选择每个宏批次应采样的实例数量，以提供足够的统计功效来正确检测记忆现象。</p>
+<h2 id="持续记忆">持续记忆</h2>
+<p>持续记忆估计值（在第 3 节中定义为$$\tau_{g,c}$$当 <em>g</em>&gt;<em>c</em> 时）显示在图 2 的记忆特征非对角线上。图 4 显示了特定处理后时间步数下的平均持续记忆；在这个图中，$$\tau_{g,c}$$ 在每个 <em>c</em>−<em>g</em> 上跨宏批次取平均。这种聚合方式使我们能够总结模型的一般记忆模式。较小的模型具有较低的持续记忆，其中 70M 模型几乎没有持续记忆。有趣的是，<strong>持续记忆在 25,000 步后趋于稳定。这一结果对训练期间的数据顺序安排有影响。例如，如果我们有一些不希望模型记住但仍想在训练中使用的实例，它们应该被安排在较早的批次中</strong>。</p>
+<p>通过跨宏批次取平均，方差更低，更多的估计值变得具有统计显著性。</p>
+<h2 id="残余记忆">残余记忆</h2>
+<p>残余记忆估计值（在第 3 节中定义为 $\tau_{g,c}$当 <em>c</em>=<em>T</em> 时）显示在图 2 的最后一列中，并在图 5 中也展示（在这里我们考虑 <em>T</em> 为第一个 epoch 的结束，即第 95,000 步）。有趣的是，虽然所有宏批次都经历了某种程度的即时记忆，但如图所示，许多宏批次在第一个 epoch 结束时已被遗忘，因为残余记忆估计值在统计上不显著。此外，与我们的持续记忆结果一致，残余记忆也表现出近期效应：最后几个宏批次的记忆最强。我们假设这种近期效应可以用学习率调度来解释。具体来说，当学习率较高时，优化过程会使模型参数朝着局部最优方向移动更远，从而用新信息覆盖旧信息；这导致更高的即时记忆和更低的残余记忆。相反，在训练过程接近尾声、学习率较低时，由于更新幅度变小（期望值意义上），旧信息被“遗忘”的程度较低，从而导致更高的残余记忆和更低的即时记忆。</p>
+<p>我们注意到我们的结果与 Biderman 等人（2023b）有所不同，他们发现实例的处理步数对记忆没有差异。我们推测这种差异源于用于量化记忆的指标和采用的统计方法的不同。</p>
+<p><img src="/images/image-20250613111030731.png" alt="image-20250613111030731"></p>
+<h2 id="不同规模下的记忆">不同规模下的记忆</h2>
+<p>由于训练大型语言模型的成本高昂，在实际训练之前预测模型特性是非常有价值的。一种策略是从较小的模型中获取洞察，以指导更大模型的设计。不同规模下的可预测性在图 3 和图 4 中非常直观，因为不同模型规模之间呈现出相似的趋势。我们在图 6 中正式表达了这一直觉，其中我们报告了不同模型记忆特征之间的皮尔逊相关系数。有趣的是，较大模型（如 12B）的记忆可以从较小模型（如 410M）中预测。我们注意到 70M 和 160M 模型对 12B 模型的记忆预测能力较差。然而，先前的研究表明这两个模型都存在训练不稳定的问题（Godey 等人，2024）；因此，这种预测能力的下降可能是 Pythia 套件特有的。</p>
+<p><img src="/images/image-20250613111757431.png" alt="image-20250613111757431"></p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/causal-debias/">causal debias</a></div><div class="post-share"><div class="social-share" data-image="/img/Hazel.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models"><img class="cover" src="/img/Hazel.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Causal-Guided Active Learning for Debiasing Large Language Models</div></div><div class="info-2"><div class="info-item-1">   收录于 ACL                Abstract 作者提出了一种因果引导的主动学习框架（Causal-Guided Active Learning，CAL），框架利用LLM自身，自动且自主的识别信息量丰富的的偏见样本并归纳偏见模式，随后采用一种高效且低成本的基于上下文学习（ICL）方法，在生成过程中防止LLM利用数据集偏见。 主动学习旨在选择最具信息量的样本，并查询外部信息源对其标注。在去偏场景中，CAL通过寻找模型无法建模因果不变语义关系的样本来识别偏见实例，然后通过发现数据集偏见对LLM生成影响最大的样本，选取最具信息量的偏见实例。 Dataset: Chatbot、MT-Bench...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-05</div><div class="info-item-2">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</div></div><div class="info-2"><div class="info-item-1">   收录于 IJCAI 2024                Abstract 本文提出了一种 因果感知的长对话框架（Causal Perception long-term Dialogue framework, CPD）用于解决在长对话中llm的位置偏差（Position Bias，指在模型在处理输入序列时，倾向于优先关注某些特定位置的信息，而忽视其他位置的重要内容，在长文本或对话任务中尤为明显）。这一偏差导致模型过度地关注虚假的位置相关性，而非真正的因果相关的话语。  主要工作：  提出一种基于因果扰动的话语提取方法，结合局部位置感知机制，能够有效避免LLM的位置信息干扰 提出一种因果感知微调策略，显著缓解模型的“位置偏差”问题，提升模型在对话中捕捉因果关系的能力  baseline： dataset：CGDIALOG、 ESConv、MSC 基础模型：Llama2-7B-chat、Qwen-14B-chat Method 处理效应（Treatment...</div></div></div></a><a class="pagination-related" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-09</div><div class="info-item-2">Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models</div></div><div class="info-2"><div class="info-item-1">   收录于 arxiv                Abstract 本文主要工作： 提出信息增益引导的因果干预去偏框架（information gain-guided causal intervention debiasing,ICD），为消除指令微调数据集中的偏差，必须确保这些偏差特征对预测答案不提供任何附加信息，即令偏差特征的信息增益为0 。框架利用基于因果干预的数据重写方法，自动并自主地平衡指令微调数据集的分布，降低信息增益。在去偏后的数据集上采用标准监督微调流程训练LLM。 Dataset：		 Llama3.1-8B、部分 Flan 2021、MMLU 、BBH 、TruthfulQA Baseline：	       Vanilla SFT、Razor LLM:    		    Llama3.1-8B     Gemma-9B 评估方法:		In-Domain Test Sets、Transfer Test Sets、Challenge Test...</div></div></div></a><a class="pagination-related" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-10</div><div class="info-item-2">Causal-Guided Active Learning for Debiasing Large Language Models</div></div><div class="info-2"><div class="info-item-1">   收录于 ACL                Abstract 作者提出了一种因果引导的主动学习框架（Causal-Guided Active Learning，CAL），框架利用LLM自身，自动且自主的识别信息量丰富的的偏见样本并归纳偏见模式，随后采用一种高效且低成本的基于上下文学习（ICL）方法，在生成过程中防止LLM利用数据集偏见。 主动学习旨在选择最具信息量的样本，并查询外部信息源对其标注。在去偏场景中，CAL通过寻找模型无法建模因果不变语义关系的样本来识别偏见实例，然后通过发现数据集偏见对LLM生成影响最大的样本，选取最具信息量的偏见实例。 Dataset: Chatbot、MT-Bench...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Anifled</div><div class="author-info-description">我与我 周旋久</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">Abstract</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">Background</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E5%BB%BA%E6%A8%A1"><span class="toc-number">2.1.</span> <span class="toc-text">语言建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%A0%E6%9E%9C%E5%88%86%E6%9E%90"><span class="toc-number">2.2.</span> <span class="toc-text">因果分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Method</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E4%BA%8B%E5%AE%9E%E8%AE%B0%E5%BF%86"><span class="toc-number">3.1.</span> <span class="toc-text">反事实记忆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E4%BA%8B%E5%AE%9E%E8%AE%B0%E5%BF%86%E6%98%AF%E6%8C%87%E5%9C%A8%E8%A7%82%E6%B5%8B%E5%88%B0%E7%9A%84%E6%97%B6%E9%97%B4%E6%AD%A5G-x-g%E5%AF%B9%E5%AE%9E%E4%BE%8Bx%E8%BF%9B%E8%A1%8C%E8%AE%AD%E7%BB%83%EF%BC%8C%E5%AF%B9%E6%A8%A1%E5%9E%8B%E5%9C%A8%E6%97%B6%E9%97%B4%E6%AD%A5c%E4%B8%8A%E5%AF%B9%E8%AF%A5%E7%BB%9F%E4%B8%80%E5%AE%9E%E4%BE%8B%E8%A1%A8%E7%8E%B0%E6%89%80%E4%BA%A7%E7%94%9F%E7%9A%84%E5%9B%A0%E6%9E%9C%E6%95%88%E5%BA%94%EF%BC%9A-tau-x-c-overset-text-def-underbrace-Y-c-x-g-text-%E8%AE%AD%E7%BB%83%E6%97%B6%E5%8C%85%E5%90%AB-x-%E6%97%B6%E5%9C%A8-x-%E4%B8%8A%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="toc-number">3.2.</span> <span class="toc-text">反事实记忆是指在观测到的时间步G(x)&#x3D;g对实例x进行训练，对模型在时间步c上对该统一实例表现所产生的因果效应：
+$$
+\tau_{x,c} \overset{\text{def}}{&#x3D;}
+\underbrace{Y_c(x; g)}_{\text{训练时包含 $x$ 时在 $x$ 上的表现}}</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E7%9A%84%E4%BC%B0%E8%AE%A1"><span class="toc-number">3.3.</span> <span class="toc-text">记忆的估计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%86%E8%AE%B0%E5%BF%86%E5%AE%9A%E4%B9%89%E5%9C%A8%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4%E6%AD%A5-g-%E5%B1%82%E9%9D%A2%E7%9A%84%E5%AE%9E%E9%99%85%E5%90%AB%E4%B9%89%E6%98%AF%EF%BC%9A%E6%88%91%E4%BB%AC%E5%8F%AA%E8%83%BD%E5%AF%B9%E5%9C%A8%E5%90%8C%E4%B8%80%E6%97%B6%E9%97%B4%E6%AD%A5%E8%A2%AB%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B7%E6%9C%AC%E7%BB%84-%EF%BC%88%E5%8D%B3%E6%89%B9%E6%AC%A1-B-g-%EF%BC%89%E5%81%9A%E5%87%BA%E5%9B%A0%E6%9E%9C%E6%8E%A8%E6%96%AD%EF%BC%8C%E8%80%8C%E4%B8%8D%E8%83%BD%E9%92%88%E5%AF%B9%E5%8D%95%E4%B8%AA%E5%AE%9E%E4%BE%8B%E8%BF%9B%E8%A1%8C%E3%80%82-begin-equation-tau-g-c-underbrace-mathbb-E-x-left-Y-c-x-g-mid-G-x-g-right-1"><span class="toc-number">3.4.</span> <span class="toc-text">将记忆定义在处理时间步 g 层面的实际含义是：我们只能对在同一时间步被训练的样本组 （即批次 $B_g$ ）做出因果推断，而不能针对单个实例进行。
+$$
+\begin{equation}
+\tau_{g,c} &#x3D;
+\underbrace{\mathbb{E}x \left[ Y_c(x; g) \mid G(x)&#x3D;g \right]}{1}</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%AE%E5%88%86%E4%BC%B0%E8%AE%A1%E5%99%A8%EF%BC%88Difference-Estimator%EF%BC%89"><span class="toc-number">3.4.1.</span> <span class="toc-text">差分估计器（Difference Estimator）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%AE%E5%88%86%E4%B8%AD%E7%9A%84%E5%B7%AE%E5%88%86%E4%BC%B0%E8%AE%A1%E5%99%A8"><span class="toc-number">3.4.2.</span> <span class="toc-text">差分中的差分估计器</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">在没有训练的情况下，模型在不同检查点之间的表现变化趋势对于不同处理组是相同的。即对于任意c,c’≥g-1：
+$$
+\begin{equation}
+\mathbb{E}x \left[ Y_c(x; \infty) - Y{c’}(x; \infty) \mid G(x)&#x3D;g \right]</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.</span> <span class="toc-text">记忆的定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E4%BA%8B%E5%AE%9E%E8%AE%B0%E5%BF%86%E7%9A%84%E5%B7%B2%E6%9C%89%E6%93%8D%E4%BD%9C%E5%8C%96%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.1.</span> <span class="toc-text">反事实记忆的已有操作化定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%B1%E5%93%8D%E5%87%BD%E6%95%B0"><span class="toc-number">4.1.2.</span> <span class="toc-text">影响函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E6%8F%90%E5%8F%96%E8%AE%B0%E5%BF%86"><span class="toc-number">4.1.3.</span> <span class="toc-text">可提取记忆</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">Experiment</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Pythia%E5%A5%97%E4%BB%B6"><span class="toc-number">5.1.</span> <span class="toc-text">Pythia套件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E9%9D%A2%E6%9D%BF%E6%95%B0%E6%8D%AE"><span class="toc-number">5.2.</span> <span class="toc-text">创建面板数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E8%AE%A1%E6%8E%A8%E6%96%AD"><span class="toc-number">5.3.</span> <span class="toc-text">统计推断</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">6.</span> <span class="toc-text">Results</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%B3%E6%97%B6%E8%AE%B0%E5%BF%86"><span class="toc-number">6.1.</span> <span class="toc-text">即时记忆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%81%E7%BB%AD%E8%AE%B0%E5%BF%86"><span class="toc-number">6.2.</span> <span class="toc-text">持续记忆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AE%8B%E4%BD%99%E8%AE%B0%E5%BF%86"><span class="toc-number">6.3.</span> <span class="toc-text">残余记忆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E8%A7%84%E6%A8%A1%E4%B8%8B%E7%9A%84%E8%AE%B0%E5%BF%86"><span class="toc-number">6.4.</span> <span class="toc-text">不同规模下的记忆</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal Estimation of Memorisation Profiles"/></a><div class="content"><a class="title" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles">Causal Estimation of Memorisation Profiles</a><time datetime="2025-06-11T12:33:39.000Z" title="发表于 2025-06-11 20:33:39">2025-06-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal-Guided Active Learning for Debiasing Large Language Models"/></a><div class="content"><a class="title" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models">Causal-Guided Active Learning for Debiasing Large Language Models</a><time datetime="2025-06-10T08:25:52.000Z" title="发表于 2025-06-10 16:25:52">2025-06-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"/></a><div class="content"><a class="title" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models">Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models</a><time datetime="2025-06-09T01:52:17.000Z" title="发表于 2025-06-09 09:52:17">2025-06-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"/></a><div class="content"><a class="title" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</a><time datetime="2025-06-05T04:28:02.000Z" title="发表于 2025-06-05 12:28:02">2025-06-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/04/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" title="面向对象-方法"><img src="/img/Subu.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="面向对象-方法"/></a><div class="content"><a class="title" href="/2025/06/04/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" title="面向对象-方法">面向对象-方法</a><time datetime="2025-06-04T09:32:08.000Z" title="发表于 2025-06-04 17:32:08">2025-06-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgb(219,255,253);"><div id="footer-wrap"><div class="copyright">&copy;2025 By Anifled</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text">作者：<strong>anifled</strong>，转载请注明作者。<a target="_blank" rel="noopener" href="https://github.com/anifled12138">GitHub</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

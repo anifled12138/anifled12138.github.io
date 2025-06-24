@@ -1,0 +1,348 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Causal-Guided Active Learning for Debiasing Large Language Models | To be or not to be</title><meta name="author" content="Anifled"><meta name="copyright" content="Anifled"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="收录于 ACL                Abstract 作者提出了一种因果引导的主动学习框架（Causal-Guided Active Learning，CAL），框架利用LLM自身，自动且自主的识别信息量丰富的的偏见样本并归纳偏见模式，随后采用一种高效且低成本的基于上下文学习（ICL）方法，在生成过程中防止LLM利用数据集偏见。 主动学习旨在选择最具信息量的样本，并查询外部信息源对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Causal-Guided Active Learning for Debiasing Large Language Models">
+<meta property="og:url" content="http://anifled12138.github.io/2025/06/10/cal/index.html">
+<meta property="og:site_name" content="To be or not to be">
+<meta property="og:description" content="收录于 ACL                Abstract 作者提出了一种因果引导的主动学习框架（Causal-Guided Active Learning，CAL），框架利用LLM自身，自动且自主的识别信息量丰富的的偏见样本并归纳偏见模式，随后采用一种高效且低成本的基于上下文学习（ICL）方法，在生成过程中防止LLM利用数据集偏见。 主动学习旨在选择最具信息量的样本，并查询外部信息源对">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://anifled12138.github.io/img/Hazel.jpg">
+<meta property="article:published_time" content="2025-06-10T08:25:52.000Z">
+<meta property="article:modified_time" content="2025-06-11T12:34:40.000Z">
+<meta property="article:author" content="Anifled">
+<meta property="article:tag" content="causal debias">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://anifled12138.github.io/img/Hazel.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Causal-Guided Active Learning for Debiasing Large Language Models",
+  "url": "http://anifled12138.github.io/2025/06/10/cal/",
+  "image": "http://anifled12138.github.io/img/Hazel.jpg",
+  "datePublished": "2025-06-10T08:25:52.000Z",
+  "dateModified": "2025-06-11T12:34:40.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Anifled",
+      "url": "http://anifled12138.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/bitbug_favicon.ico"><link rel="canonical" href="http://anifled12138.github.io/2025/06/10/cal/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Causal-Guided Active Learning for Debiasing Large Language Models',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/background.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/Hazel.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">To be or not to be</span></a><a class="nav-page-title" href="/"><span class="site-name">Causal-Guided Active Learning for Debiasing Large Language Models</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Causal-Guided Active Learning for Debiasing Large Language Models</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-10T08:25:52.000Z" title="发表于 2025-06-10 16:25:52">2025-06-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-06-11T12:34:40.000Z" title="更新于 2025-06-11 20:34:40">2025-06-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Papers/">Papers</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div>
+  <span style="float: left;">收录于 <strong><em>ACL</em></strong></span>
+  <a href="https://aclanthology.org/2024.acl-long.778.pdf#:~:" target="_blank" style="float: right;">
+    <img src="/images/icons8-pdf-40.png" alt="PDF" width="40">
+  </a>
+  <div style="clear: both;"></div>
+</div>
+<h1>Abstract</h1>
+<p>作者提出了一种因果引导的主动学习框架（Causal-Guided Active Learning，<a target="_blank" rel="noopener" href="https://github.com/SZU-AdvTech-2024/235-Causal-Guided-Active-Learning-for-Debiasing-Large-Language-Models">CAL</a>），框架利用LLM自身，自动且自主的识别信息量丰富的的偏见样本并归纳偏见模式，随后采用一种高效且低成本的基于上下文学习（ICL）方法，在生成过程中防止LLM利用数据集偏见。</p>
+<p>主动学习旨在选择最具信息量的样本，并查询外部信息源对其标注。在去偏场景中，CAL通过寻找模型无法建模因果不变语义关系的样本来识别偏见实例，然后通过发现数据集偏见对LLM生成影响最大的样本，选取最具信息量的偏见实例。</p>
+<p><strong>Dataset</strong>: Chatbot、MT-Bench 、MNLI</p>
+<p><strong>Baseline</strong>:ZS（Zero-Shot）、ZS-known（已知偏见零样本）、FS（Few-Shot）</p>
+<p><strong>LLM</strong>:llama2-13B-chat、vicuna-13B-v1.5</p>
+<h1>Preliminary</h1>
+<h2 id="基于因果视角的文本语料数据集偏见">基于因果视角的文本语料数据集偏见</h2>
+<p>位置偏见、冗长偏见等偏见仍然广泛存在于特定任务的数据集中，一个文本X，在语料库D中随后出现的文本Y会受到两个因素影响，如下图（a）：</p>
+<ul>
+<li>X和Y之间的语义关系</li>
+<li>D中存在的数据集偏差</li>
+</ul>
+<p><img src="/images/image-20250611144123428.png" alt="image-20250611144123428"></p>
+<p>语义关系f<sub>s</sub>（·），将带有偏见的关系记作g<sub>B</sub>（·），给定X，语料库D中Y的条件分布可以形式化为：<br>
+$$<br>
+P(Y|X) = P(f_S(X), g_B(X)|X)<br>
+$$</p>
+<h2 id="生成式LLM的偏见">生成式LLM的偏见</h2>
+<p>生成式LLM不可避免地被训练用于建模f<sub>s</sub>（·）和g<sub>B</sub>（·），因此给定前序文本X<sub>i</sub>，LLM不仅会关注X<sub>i</sub>的语义，还会关注诸如否定词、性别指示词、选项位置等带有偏见的模式，从而生成Y。导致模型生成的 $\hat {Y}$会u受到来自数据集的偏见。</p>
+<p><em>将X<sub>i</sub>的语义信息记作S<sub>i</sub>，将带有偏见的模式记作B<sub>i</sub></em></p>
+<h2 id="主动学习">主动学习</h2>
+<p>主动学习旨在选择最具信息量的实例，然后查询外部信息源对这些数据点进行标注。<strong>主动学习的关键在于如何设计查询策略以选择最具信息量的示例。</strong></p>
+<p>本文在自动去偏的场景下，提出了两个关键问题：</p>
+<ol>
+<li>找出哪些实例包含偏见；</li>
+<li>找出最具信息量的带有偏见的实例。</li>
+</ol>
+<h1>Method</h1>
+<p><img src="/images/image-20250611144123428.png" alt="image-20250611144123428"></p>
+<p>CAL框架包含两个主要组成部分：</p>
+<ol>
+<li>基于因果不变性的偏见实例识别；</li>
+<li>典型偏见实例选择与偏见模式归纳。</li>
+</ol>
+<p>在识别偏见模式的基础上，提出一种基于上下文学习的去偏方法，用于对LLM进行正则化。</p>
+<h2 id="基于因果不变性的偏见示例识别">基于因果不变性的偏见示例识别</h2>
+<p>首先通过语义信息和偏见信息之间的差异，在因果变化视角下识别一组反映LLMs中固有偏见的实例。</p>
+<p>相比于语义信息，偏见信息的本质特征是：B（偏见）与后续文本之间<strong>没有不变的因果关系</strong> ，使得可以将偏见信息与语义信息解耦。</p>
+<p>输入前序文本X既包含语义S，也包含数据集偏见B。因此，在一个足够大的数据集中，对于任意实例$(X_i, Y_i)$，可能存在其他实例$(X_j, Y_j)$，与$(X_i, Y_i)$具有如下关系：<br>
+$$<br>
+(B_i, S_i) ⊂ X_i，(B_j, S_j) ⊂ X_j;Bi = Bj，Si ≠ Sj<br>
+$$<br>
+两个实例对可能有相同类型的数据集偏见，但是有不同的语义信息，使得可以通过因果不变性来识别偏见。</p>
+<p>考虑一对实例$ ⟨(X_i,Y_i),(X_j,Y_j)⟩$：</p>
+<ul>
+<li>如果模型主要捕捉了语义信息$S_i$和$S_j$，并且$H_i^M$≈$H_j^M$，说明$S_i$和$S_j$，进而$Sim(Y_i,Y_j)→1$</li>
+<li>如果其中$H_i^M$≈$H_j^M$，但$Sim(Y_i,Y_j)$较低，则这对示例可以被视为违反了因果不变性，可以用于刻画LLM所捕获的偏见。</li>
+</ul>
+<p>$H_i^M$指LLM在处理输入文本$X_i$时产生的隐藏状态表示。</p>
+<p><strong>定义1（反例对）</strong>：</p>
+<p>$∀(X_i,Y_i), (X_j,Y_j) ∈ D，i ≠ j$，若满足条件：<br>
+$$<br>
+S(H^M_i, H^M_j) &gt; τ，且 Sim(Y_i,Y_j) &lt; α,<br>
+$$<br>
+这些反例对中因果信息被破坏，后续文本是基于偏见信息生成的，因此$H_i^M$和$H_j^M$包含相同的偏见信息$B_i=B_j$</p>
+<p>但是这要求LLM确实捕捉到了预测信息，包含偏见和语义信息，但实际当$X_i$非常困难时或模糊时，不能排除LLM未能捕捉任何信息的可能性。作者引入了一个额外的过滤过程——预测准则（Predictive Criterion），要求LLM至少能对示例i或j做出合理的生成。因此如果在i和j上生成都不合理，那么LLM可能未从$X_i$和$X_j$中捕获到任何预测信息：<br>
+$$<br>
+\operatorname{Sim}(\hat{Y}_i, Y_i) &gt; \beta \vee \operatorname{Sim}(\hat{Y}_j, Y_j) &gt; \beta<br>
+$$<br>
+$\hat {Y}_i$和$\hat {Y}_j$是生成的后续文本，大于阈值时，视其为正确答案。</p>
+<h2 id="信息量丰富的偏见实例选择与偏见模式归纳">信息量丰富的偏见实例选择与偏见模式归纳</h2>
+<p>要从上述一组违反因果不变性标准，包含偏见的实例，现在要从中选出更具信息量，且包含典型数据集偏见的子集，以便进一步归纳可解释的偏见模式，防止LLM利用偏见。</p>
+<p><strong>典型偏见实例识别标准</strong>：</p>
+<ul>
+<li>对于任意输入文本$X_i$，如果$Y_i$被正确生成的概率很低，说明偏见信息显著阻碍了LLM的生成能力。因此，这类例子包含高水平的偏见，属于信息量丰富的偏见实例。</li>
+<li>若一个反例对$ ⟨(X_i,Y_i),(X_j,Y_j)⟩$LLM生成的$\hat {Y}_i$和$\hat {Y}_j$差异很大，说明数据集偏见的影响多样化，难以从这些样本中总结统一的偏见模式。若两个生成相似，说明偏见更容易总结。</li>
+</ul>
+<p><strong>公式2（影响力标准）</strong>：<br>
+$$<br>
+\hat{P}(l_j \mid X_j) &lt; \tau_p, \quad \text{且} \quad \operatorname{Sim}(\hat{Y}_j, Y_j) &lt; \alpha<br>
+$$<br>
+$l_j$是真实后续文本，$\hat{P}(l_j \mid X_j)$是模型生成真实后续文本的概率。</p>
+<p><strong>公式3（典型性标准）</strong>：<br>
+$$<br>
+\operatorname{Sim}(\hat{Y}_j, \hat Y_j) &gt; \beta<br>
+$$<br>
+作者将反例对分为若干个簇，然后为每个簇归纳其偏见模式，反例对的聚类基于其偏见表示向量，即反例对中偏见成分的表示向量。通过提取两个示例表示中的相似部分来获取反例对$ ⟨(X_i,Y_i),(X_j,Y_j)⟩$的偏见表示向量，$H_i^M$和$H_j^M$相似部分携带了偏见信息。</p>
+<p>用主成分分析（PCA）将偏见表示向量降维至二维空间。随着数据维度增加，点之间的距离趋于相似，使用基于密度的聚类方法DBSCAN对降维后的偏见表示向量进行聚类。最终得到每个簇内的反例对，并将其提供给GPT-4进行偏见模式归纳。</p>
+<h2 id="基于上下文学习的偏见抑制">基于上下文学习的偏见抑制</h2>
+<p>为了防止LLMs利用数据集偏见进行生成，同时避免微调方法的缺点，作者提出了一种成本低、效率高的**上下文学习（ICL）**方法。</p>
+<p><strong>在零样本场景下：</strong></p>
+<p>如上图(b)所示，使用自动归纳出的偏见模式，明确告诉LLM在推理过程中不应使用哪些信息。做法是在原始提示末尾附加一句：“[偏见xxx] 与 [任务目标] 无关”。</p>
+<p><strong>在少样本场景下</strong>：</p>
+<p>提出一种<strong>反事实ICL方法</strong> ，通过向LLM提供自动推导出的反事实示例，修正其关于偏见的认知。如果能找到“反事实示例”，即使用偏见信息进行推理反而会导致错误生成的示例，那么通过在提示中提供此类示例，LLM将隐式地认识到偏见信息与后续文本无关，从而被正则化，不再使用偏见信息进行推理。</p>
+<p>在构建Prompt时，使用以下格式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;EXAMPLES&gt;. 注意你不应利用偏见信息进行生成。</span><br></pre></td></tr></table></figure>
+<p>其中，`<EXAMPLES>`是反事实案例。</EXAMPLES></p>
+<h1>Experiment</h1>
+<h2 id="实验细节">实验细节</h2>
+<p>在具有明确答案集合的数据集上测试我们的方法，例如：多选题问答任务，这样可以使用字符串精确匹配来实现<strong>公式1</strong>中的 Sim(·) 函数。如果两个输出完全匹配，则函数值为 1；否则为 0。因此，α 和 β 可以取 0 到 1 之间的任意值。</p>
+<p>通过提取 LLM 最后一层顶部 token 的嵌入向量来获得输入文本的表示，并使用余弦相似度作为评分函数 S(·)，用于衡量这些隐藏状态之间的相似性。</p>
+<p>为了获得一个反例对的偏见表示向量，我们需要提取该对实例对应隐藏状态中的相似部分。以逐元素的方式获取两个隐藏状态的相似成分。具体公式如下：<br>
+$$<br>
+f(H_{ik}, H_{jk}) =<br>
+\begin{cases}<br>
+\dfrac{H_{ik} + H_{jk}}{2} &amp; \text{if } \dfrac{|H_{ik} - H_{jk}|}{H_{ik} + H_{jk}} &lt; \mu \<br>
+0 &amp; \text{otherwise}<br>
+\end{cases}<br>
+$$<br>
+$H_{ik}$和$H_{jk}$是两个隐藏状态$H_i^M$和$H_j^M$的第k个元素，如果$H_{ik}$和$H_{jk}$足够相似，他们的差异应该相对较小，使用$\dfrac{|H_{ik} - H_{jk}|}{H_{ik} + H_{jk}}$来衡量这种差异，并通过阈值μ判断是否足够小，如果相似，就用他们的平均值来表示<strong>偏见表示向量</strong>的第k个元素，若不相似，则使用0表示。</p>
+<p>通过控制在 MNLI 数据集中某些位置上的两个元素被认为“足够相似”的比例来选择 µ 值。我们将比率的严格阈值设为 0.15，以确保反例对的偏见表示向量包含更纯净的偏见信息。</p>
+<p><em><strong>请注意：没有必要在整个语料库上运行 CAL 来获取偏见实例和偏见模式。只需一个子集（例如 20,000 个实例）就足以节省计算成本。</strong></em></p>
+<p>在少样本场景下，为了使结果具有可比性，确保提示中的示例数量与其它少样本基线一致。同时保持金标准答案在少样本示例中的出现顺序，以避免引入额外的标签偏见。考虑到反事实示例抽样的随机性，作者报告了 10 次运行的平均结果。</p>
+<h2 id="评估任务">评估任务</h2>
+<h3 id="泛化能力："><strong>泛化能力</strong>：</h3>
+<p>通过在一个数据集 A 上识别偏见实例和偏见模式，并将这些信息用于去偏数据集 A 和 B，从而评估模型的泛化能力。</p>
+<p>两个数据集 A 和 B 可能具有不同的数据集偏见分布。如果一个 LLM 仅适应数据集 A，那么它在数据集 B 上的表现会受到影响。相反，如果 LLM 更多地关注语义信息，则在两个数据集上的表现都会提高。因此，可以通过与基线方法相比的性能提升来评估泛化能力。</p>
+<p><strong>(1) 生成式大语言模型特定偏见</strong></p>
+<p>使用 Chatbot 和 MT-Bench 数据集作为基准。在这两个数据集中，LLM 需要从两个候选响应中选择更好的一个。作者在 Chatbot 数据集上归纳偏见模式，并测试这些基于 Chatbot 的偏见模式是否可用于去偏 LLM 在 Chatbot 和 MT-Bench 数据集上的表现。</p>
+<p><strong>(2) 任务特定偏见</strong></p>
+<p>作者选择了自然语言推理数据集 MNLI及其人工去偏版本 HANS作为基准。仅依赖偏见信息的模型在 HANS 上的表现通常接近于随机基线。我们从 MNLI 数据集中归纳偏见模式，并测试 CAL 是否可以利用这些偏见模式在 MNLI 和 HANS 数据集上去偏 LLM。</p>
+<h3 id="无害化评估："><strong>无害化评估：</strong></h3>
+<p>在 BBQ（Parrish 等，2022）和 UNQOVER数据集上进行实验，这两个数据集专门用于评估 LLM 的刻板印象偏见（如性别偏见和种族偏见）。BBQ 包含 9 种刻板印象偏见类型，UNQOVER 包含 4 种。在这两个数据集上，如果模型准确率越高，则说明其含有刻板印象的可能性越低。</p>
+<h2 id="主要结果">主要结果</h2>
+<img src="/images/image-20250611174913290.png" alt="image-20250611174913290" style="zoom:67%;">
+<ol>
+<li>
+<p>与普通的零样本方法相比，基于先验知识的零样本去偏方法在所有数据集上都表现出更好的性能。这表明通过上下文学习（ICL），LLMs 可以有效去偏，并避免了与微调方法相关的分布内性能下降问题（Du 等，2023），说明了基于 ICL 的去偏方法具有优越性。</p>
+</li>
+<li>
+<p>相比于零样本和少样本基线方法，CAL 在两类基准任务上均取得了稳定性能提升。这表明 CAL 能够提升 LLMs 的泛化能力和无害性，并且通过利用语义信息与偏见信息之间的本质差异，可以识别出一组偏见实例，而基于反事实 ICL 的提示可以有效地利用这些偏见示例来去偏 LLMs。</p>
+</li>
+<li>
+<p>相比于普通零样本基线方法，零样本 CAL 在所有数据集上都能持续提升模型性能，甚至在部分基准任务上超越了少样本方法的表现。零样本 CAL 的有效性表明，CAL 所归纳出的偏见模式是典型的，并且确实存在于数据集中。这是因为通过结合因果不变性、影响力标准和典型性标准，我们可以选出一组具有代表性的偏见实例，从而有效地归纳出偏见模式。</p>
+</li>
+<li>
+<p>相比于基于先验知识的零样本去偏方法，零样本 CAL 在两类基准任务上的表现相当或更优。一方面，数据集偏见分布的复杂性为准确全面检测潜在偏见带来了挑战；另一方面，零样本 CAL 与基于先验知识的零样本方法之间表现相当，也展示了我们方法的有效性和在实际场景中的应用潜力，因为对各种真实世界语料库进行全面偏见分析是不现实的。</p>
+</li>
+</ol>
+<img src="/images/image-20250611192646323.png" alt="image-20250611192646323" style="zoom:67%;">
+<p>基于从 Chatbot 数据集中导出的反例对，CAL 可以同时归纳出位置偏见、冗长性偏见和格式偏见，这些偏见分别被此前多个研究识别过（Zheng 等，2023；Zhu 等，2023）。此外，作者也观察到一些潜在的偏见模式，例如“响应的长度或复杂度”和“是否存在具体细节或自信语气”，这些是之前未被报道的。当告诉 llama2-13B-chat 不要基于这些偏见做出预测时，其在 Chatbot 和 MT-Bench 数据集上的表现都有所提升，这表明这些模式确实是存在的偏见。</p>
+<p>在 BBQ 数据集（Parrish 等，2022）已知的 9 种刻板印象偏见中，作者的方法可以在无需先验知识的情况下自动识别出其中 7 种（性别、性取向和宗教偏见在偏见归纳过程中被归入“名称文化关联”）。在 MNLI 数据集中，作者还观察到一些未被报告的新偏见模式，例如“假设中的推测性语言”（如 should, perhaps, possibly），并通过告诉模型不要基于这些偏见模式进行预测，提升了 llama2-13B-chat 的表现。</p>
+<p><img src="/images/image-20250611191315144.png" alt="image-20250611191315144"></p>
+<p>作者尝试基于从 llama2-13b-chat 中识别出的偏见模式（及对应的去偏提示）来去偏 GPT-4。实验结果如表2所示，可以看出相比于普通零样本方法，ZS-CAL 在大多数情况下表现更好。</p>
+<p>作者使用 GPT-4 来归纳可解释的偏见模式。我们也尝试使用开源 LLM Qwen1.5-72B-Chat 来归纳偏见模式，以检验其泛化能力。</p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/causal-debias/">causal debias</a></div><div class="post-share"><div class="social-share" data-image="/img/Hazel.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"><img class="cover" src="/img/Hazel.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models</div></div><div class="info-2"><div class="info-item-1">   收录于 arxiv                Abstract 本文主要工作： 提出信息增益引导的因果干预去偏框架（information gain-guided causal intervention debiasing,ICD），为消除指令微调数据集中的偏差，必须确保这些偏差特征对预测答案不提供任何附加信息，即令偏差特征的信息增益为0 。框架利用基于因果干预的数据重写方法，自动并自主地平衡指令微调数据集的分布，降低信息增益。在去偏后的数据集上采用标准监督微调流程训练LLM。 Dataset：		 Llama3.1-8B、部分 Flan 2021、MMLU 、BBH 、TruthfulQA Baseline：	       Vanilla SFT、Razor LLM:    		    Llama3.1-8B     Gemma-9B 评估方法:		In-Domain Test Sets、Transfer Test Sets、Challenge Test...</div></div></div></a><a class="pagination-related" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img class="cover" src="/img/Hazel.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Causal Estimation of Memorisation Profiles</div></div><div class="info-2"><div class="info-item-1">   收录于 ACL 2024 best papers             ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-11</div><div class="info-item-2">Causal Estimation of Memorisation Profiles</div></div><div class="info-2"><div class="info-item-1">   收录于 ACL 2024 best papers             ...</div></div></div></a><a class="pagination-related" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-05</div><div class="info-item-2">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</div></div><div class="info-2"><div class="info-item-1">   收录于 IJCAI 2024                Abstract 本文提出了一种 因果感知的长对话框架（Causal Perception long-term Dialogue framework, CPD）用于解决在长对话中llm的位置偏差（Position Bias，指在模型在处理输入序列时，倾向于优先关注某些特定位置的信息，而忽视其他位置的重要内容，在长文本或对话任务中尤为明显）。这一偏差导致模型过度地关注虚假的位置相关性，而非真正的因果相关的话语。  主要工作：  提出一种基于因果扰动的话语提取方法，结合局部位置感知机制，能够有效避免LLM的位置信息干扰 提出一种因果感知微调策略，显著缓解模型的“位置偏差”问题，提升模型在对话中捕捉因果关系的能力  baseline： dataset：CGDIALOG、 ESConv、MSC 基础模型：Llama2-7B-chat、Qwen-14B-chat Method 处理效应（Treatment...</div></div></div></a><a class="pagination-related" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-09</div><div class="info-item-2">Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models</div></div><div class="info-2"><div class="info-item-1">   收录于 arxiv                Abstract 本文主要工作： 提出信息增益引导的因果干预去偏框架（information gain-guided causal intervention debiasing,ICD），为消除指令微调数据集中的偏差，必须确保这些偏差特征对预测答案不提供任何附加信息，即令偏差特征的信息增益为0 。框架利用基于因果干预的数据重写方法，自动并自主地平衡指令微调数据集的分布，降低信息增益。在去偏后的数据集上采用标准监督微调流程训练LLM。 Dataset：		 Llama3.1-8B、部分 Flan 2021、MMLU 、BBH 、TruthfulQA Baseline：	       Vanilla SFT、Razor LLM:    		    Llama3.1-8B     Gemma-9B 评估方法:		In-Domain Test Sets、Transfer Test Sets、Challenge Test...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Anifled</div><div class="author-info-description">我与我 周旋久</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">Abstract</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">Preliminary</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%9B%A0%E6%9E%9C%E8%A7%86%E8%A7%92%E7%9A%84%E6%96%87%E6%9C%AC%E8%AF%AD%E6%96%99%E6%95%B0%E6%8D%AE%E9%9B%86%E5%81%8F%E8%A7%81"><span class="toc-number">2.1.</span> <span class="toc-text">基于因果视角的文本语料数据集偏见</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E5%BC%8FLLM%E7%9A%84%E5%81%8F%E8%A7%81"><span class="toc-number">2.2.</span> <span class="toc-text">生成式LLM的偏见</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E5%8A%A8%E5%AD%A6%E4%B9%A0"><span class="toc-number">2.3.</span> <span class="toc-text">主动学习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Method</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%9B%A0%E6%9E%9C%E4%B8%8D%E5%8F%98%E6%80%A7%E7%9A%84%E5%81%8F%E8%A7%81%E7%A4%BA%E4%BE%8B%E8%AF%86%E5%88%AB"><span class="toc-number">3.1.</span> <span class="toc-text">基于因果不变性的偏见示例识别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E9%87%8F%E4%B8%B0%E5%AF%8C%E7%9A%84%E5%81%8F%E8%A7%81%E5%AE%9E%E4%BE%8B%E9%80%89%E6%8B%A9%E4%B8%8E%E5%81%8F%E8%A7%81%E6%A8%A1%E5%BC%8F%E5%BD%92%E7%BA%B3"><span class="toc-number">3.2.</span> <span class="toc-text">信息量丰富的偏见实例选择与偏见模式归纳</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%B8%8A%E4%B8%8B%E6%96%87%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%81%8F%E8%A7%81%E6%8A%91%E5%88%B6"><span class="toc-number">3.3.</span> <span class="toc-text">基于上下文学习的偏见抑制</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">Experiment</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%86%E8%8A%82"><span class="toc-number">4.1.</span> <span class="toc-text">实验细节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%84%E4%BC%B0%E4%BB%BB%E5%8A%A1"><span class="toc-number">4.2.</span> <span class="toc-text">评估任务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%9B%E5%8C%96%E8%83%BD%E5%8A%9B%EF%BC%9A"><span class="toc-number">4.2.1.</span> <span class="toc-text">泛化能力：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E5%AE%B3%E5%8C%96%E8%AF%84%E4%BC%B0%EF%BC%9A"><span class="toc-number">4.2.2.</span> <span class="toc-text">无害化评估：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E7%BB%93%E6%9E%9C"><span class="toc-number">4.3.</span> <span class="toc-text">主要结果</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal Estimation of Memorisation Profiles"/></a><div class="content"><a class="title" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles">Causal Estimation of Memorisation Profiles</a><time datetime="2025-06-11T12:33:39.000Z" title="发表于 2025-06-11 20:33:39">2025-06-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal-Guided Active Learning for Debiasing Large Language Models"/></a><div class="content"><a class="title" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models">Causal-Guided Active Learning for Debiasing Large Language Models</a><time datetime="2025-06-10T08:25:52.000Z" title="发表于 2025-06-10 16:25:52">2025-06-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"/></a><div class="content"><a class="title" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models">Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models</a><time datetime="2025-06-09T01:52:17.000Z" title="发表于 2025-06-09 09:52:17">2025-06-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"/></a><div class="content"><a class="title" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</a><time datetime="2025-06-05T04:28:02.000Z" title="发表于 2025-06-05 12:28:02">2025-06-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/04/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" title="面向对象-方法"><img src="/img/Subu.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="面向对象-方法"/></a><div class="content"><a class="title" href="/2025/06/04/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" title="面向对象-方法">面向对象-方法</a><time datetime="2025-06-04T09:32:08.000Z" title="发表于 2025-06-04 17:32:08">2025-06-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgb(219,255,253);"><div id="footer-wrap"><div class="copyright">&copy;2025 By Anifled</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text">作者：<strong>anifled</strong>，转载请注明作者。<a target="_blank" rel="noopener" href="https://github.com/anifled12138">GitHub</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
