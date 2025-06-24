@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering | To be or not to be</title><meta name="author" content="Anifled"><meta name="copyright" content="Anifled"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="收录于 SIGIR 2025                Abstract 一个用于可归因问答（attributed question answering, QA）的多智能体检索增强生成（Retrieval-Augmented Generation, RAG）框架。以生成可信答案为目标，RAGentA 专注于优化答案的正确性，包括对问题的覆盖性和相关性，以及“忠实度”（faithfulne">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering">
+<meta property="og:url" content="http://anifled12138.github.io/2025/06/23/RAGentA/index.html">
+<meta property="og:site_name" content="To be or not to be">
+<meta property="og:description" content="收录于 SIGIR 2025                Abstract 一个用于可归因问答（attributed question answering, QA）的多智能体检索增强生成（Retrieval-Augmented Generation, RAG）框架。以生成可信答案为目标，RAGentA 专注于优化答案的正确性，包括对问题的覆盖性和相关性，以及“忠实度”（faithfulne">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://anifled12138.github.io/img/Hazel.jpg">
+<meta property="article:published_time" content="2025-06-23T09:17:16.000Z">
+<meta property="article:modified_time" content="2025-06-24T03:42:56.102Z">
+<meta property="article:author" content="Anifled">
+<meta property="article:tag" content="multi-agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://anifled12138.github.io/img/Hazel.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering",
+  "url": "http://anifled12138.github.io/2025/06/23/RAGentA/",
+  "image": "http://anifled12138.github.io/img/Hazel.jpg",
+  "datePublished": "2025-06-23T09:17:16.000Z",
+  "dateModified": "2025-06-24T03:42:56.102Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Anifled",
+      "url": "http://anifled12138.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/bitbug_favicon.ico"><link rel="canonical" href="http://anifled12138.github.io/2025/06/23/RAGentA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/background.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/Hazel.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">To be or not to be</span></a><a class="nav-page-title" href="/"><span class="site-name">RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-23T09:17:16.000Z" title="发表于 2025-06-23 17:17:16">2025-06-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-06-24T03:42:56.102Z" title="更新于 2025-06-24 11:42:56">2025-06-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Papers/">Papers</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div>
+  <span style="float: left;">收录于 <strong><em>SIGIR 2025</em></strong></span>
+  <a href="https://arxiv.org/pdf/2506.16988" target="_blank" style="float: right;">
+    <img src="/images/icons8-pdf-40.png" alt="PDF" width="40">
+  </a>
+  <div style="clear: both;"></div>
+</div>
+<h1>Abstract</h1>
+<p>一个用于可归因问答（attributed question answering, QA）的多智能体检索增强生成（Retrieval-Augmented Generation, RAG）框架。以生成可信答案为目标，RAGentA 专注于优化答案的正确性，包括对问题的覆盖性和相关性，以及“忠实度”（faithfulness），即答案在多大程度上基于检索到的文档。</p>
+<p>RAGentA 使用一种多智能体架构，通过迭代筛选检索文档、生成带有内联引用的答案，并通过动态优化验证其完整性。该框架的核心是一种结合稀疏与密集方法的混合检索策略，相比最佳单一检索模型，其 Recall@20 提升了 12.5%，从而产生更正确且有更好支持的答案。</p>
+<p><strong>主要工作</strong>：</p>
+<ul>
+<li>提出了 <strong>RAGentA</strong> ，一个协同的多智能体 RAG 框架，通过细粒度归因提升答案的忠实度，尤其适用于多源问题。</li>
+<li>通过结合稀疏与密集检索的方法确保高质量检索，并通过基于智能体的相关性评分选择最适合生成的文档。</li>
+<li>构建了一个多样化的合成 QA 数据集，基于 FineWeb 索引，用于测试 RAGentA 与基线 RAG 方法在检索、答案正确性和忠实度方面的表现。</li>
+</ul>
+<p><em>总体工作量小，性能提升不大，agent架构也并非原创</em></p>
+<h1>Method</h1>
+<h2 id="合成数据集">合成数据集</h2>
+<p>作者使用DataMorgana平台构建了一个多样化的合成QA基准数据集，包含500对问答，每对问题都关联多个支持性证据段落。</p>
+<p><img src="/images/image-20250624084757144.png" alt="image-20250624084757144"></p>
+<h2 id="RAGent-框架">RAGent 框架</h2>
+<h3 id="混合检索系统">混合检索系统</h3>
+<p>框架的第一阶段是一个混合检索系统，结合密集检索和稀疏检索，确保文档覆盖范围广泛且上下文相关。</p>
+<ul>
+<li><strong>稀疏检索</strong> 基于 BM25，是一种广泛采用的模型，依赖于精确的词项匹配。</li>
+<li><strong>语义检索</strong> 则通过密集嵌入实现，使用 <strong>intfloat/e5-base-v2</strong> 模型，并借助 Pinecone 作为向量存储库，以捕捉更细微的语义关系。</li>
+</ul>
+<p>两个系统通过一个可调节的插值参数α进行融合，此处α取值为0.65：<br>
+$$<br>
+S_{\text{hybrid}}(d) = \alpha \cdot S_{\text{sparse}}(d) + (1 - \alpha) \cdot S_{\text{dense}}(d)<br>
+$$</p>
+<h3 id="多智能体架构">多智能体架构</h3>
+<p><img src="/images/image-20250624092828517.png" alt="image-20250624092828517"></p>
+<p>本文多智能体架构基于MAIN-RAG框架，在本文方法中，作者保留了MAIN-RAG的核心架构，并引入了两个关键改进：对Agent-3进行修改，并新增用于答案验证的全新Agent4。</p>
+<h4 id="Agent1：Predictor">Agent1：Predictor</h4>
+<p>在完成文档检索之后，<strong>Agent-1</strong> 针对每个检索到的文档生成与查询相关的问题答案，形成 <strong>文档-查询-答案三元组（Document-Query-Answer triplets）</strong> 。该智能体使用一个大语言模型（LLM），在给定查询的上下文中分析每篇文档，并基于其内容生成答案。</p>
+<h4 id="Agent2：Judge">Agent2：Judge</h4>
+<p>该智能体通过判断文档是否有助于回答问题，来评估每篇文档的相关性。对于每一个三元组，<strong>Agent-2</strong> 回答这样一个问题：“这篇文档是否与问题相关并能提供有效支持？” 并给出“是”或“否”的二元判断。</p>
+<p>通过计算对数概率差值来实现自适应文档过滤：<br>
+$$<br>
+\text{score} = \log p(\text{“Yes”}) - \log p(\text{“No”})<br>
+$$<br>
+在对所有文档打分后，系统计算平均得分（𝜏𝑞）和标准差（𝜎），并设定一个动态阈值：<br>
+$$<br>
+\text{adjusted_}\tau_q = \tau_q - n \cdot \sigma<br>
+$$<br>
+𝑛 是控制过滤严格程度的超参数。根据 MAIN-RAG 研究的经验分析，当 𝑛 = 0.5 时性能最佳。</p>
+<p>利用这一动态阈值，系统保留得分 ≥ adjusted_𝜏𝑞 的文档，过滤得分 &lt; adjusted_𝜏𝑞 的文档。</p>
+<h4 id="Agent3：Final-Predictor">Agent3：Final-Predictor</h4>
+<p>在过滤掉不相关的文档之后，<strong>Agent-3</strong> 使用剩余的相关文档合成一个完整的答案。</p>
+<p>相对于 MAIN-RAG，<strong>Agent-3</strong> 的主要改进在于生成明确的内联引用。具体来说，<strong>Agent-3</strong> 被指示按照标准化格式 <code>[𝑋]</code>（其中 𝑋 表示对应的文档标识符）生成引用，在每个事实性陈述后立即插入少量引用样例。</p>
+<p>因此，每个陈述都被视为一个独立的“主张（claim）”，与其支持性的引用配对，并以结构化格式提取出来。</p>
+<h4 id="Agent-4：Reviser">Agent-4：Reviser</h4>
+<p><strong>Agent-4</strong>执行复杂的多阶段分析，以判断问题是否被全面回答。</p>
+<p><strong>Agent-4</strong> 通过一个系统的流程运作，首先将包含多个子问题的复杂查询分解为若干组成部分，并将每个生成的主张映射到原始问题的具体方面。</p>
+<p>这个过程评估这些主张是否有效地回应了相应的问题部分，并过滤掉无关的内容。</p>
+<p>在初步映射完成后，<strong>Agent-4</strong> 使用正则表达式函数解析结构化输出，并通过将每个部分分类为“已完全回答”、“部分回答”或“未回答”来评估答案完整性。</p>
+<p>当发现回答存在缺失时，<strong>Agent-4</strong> 会启动有针对性的后续处理流程：它生成针对这些空白的问题，并再次使用初始阶段的混合检索系统（排除之前已检索的文档），以确保获取补充信息。</p>
+<p>随后，<strong>Agent-4</strong> 为每个后续问题生成答案，并通过答案合成将新信息整合进原始答案中。</p>
+<p>这种迭代方法确保了对所有查询部分的完整覆盖，从而提升了最终答案的准确性和忠实度。</p>
+<h1>Experiment</h1>
+<p>使用生成的500对问答数据集对RAGent进行评估，先评估检索性能，再评估生成答案的正确性和忠实度。</p>
+<h2 id="检索评估">检索评估</h2>
+<p>作者采用<strong>Recall@k</strong> 和 <strong>Mean Reciprocal Rank (MRR)@k</strong> 进行检索性能评估，其中 <em>k</em>=20 ，因为这是提供给 RAGentA 框架的文档数量。</p>
+<ul>
+<li><strong>Recall@20</strong> 衡量在前 20 个检索结果中包含的相关真实证据文档的比例；</li>
+<li><strong>MRR@20</strong> 衡量第一个相关真实文档在检索结果中的排名倒数。</li>
+</ul>
+<p><img src="/images/image-20250624092224077.png" alt="image-20250624092224077"></p>
+<h2 id="正确性与忠实度评估">正确性与忠实度评估</h2>
+<p>参考 SIGIR LiveRAG 挑战赛中使用的自动评估器（autoevaluator）来评估答案的<strong>正确性</strong> 和<strong>忠实度</strong> 。由于无法使用闭源的 Claude-3.5 Sonnet 模型，我们采用 <strong>Llama-3.3-70B-Instruct</strong> 作为“LLM as a judge”模型，它接收预测答案、真实答案和引用段落，并为每个答案分配一个正确性和忠实度评分。</p>
+<ul>
+<li><strong>正确性评分范围</strong> ：[-1, 2]</li>
+<li><strong>忠实度评分范围</strong> ：[-1, 1]</li>
+</ul>
+<h3 id="正确性">正确性</h3>
+<p>该指标由两部分组成：</p>
+<ul>
+<li>
+<p><strong>覆盖度（Coverage）</strong> ：生成答案中涵盖真实答案中关键信息的比例</p>
+</li>
+<li>
+<p><strong>相关性（Relevance）</strong> ：生成答案中直接回答问题的部分所占比例，不论其是否事实正确。</p>
+</li>
+</ul>
+<p>正确性评分标准如下（四分制）：</p>
+<ul>
+<li><strong>2</strong> ：回答完全正确且无无关内容。</li>
+<li><strong>1</strong> ：回答有用，但可能包含不影响整体用处的无关内容。</li>
+<li><strong>0</strong> ：未给出答案（例如：“我不知道”）。</li>
+<li><strong>-1</strong> ：完全未回答问题。</li>
+</ul>
+<h3 id="忠实度">忠实度</h3>
+<p>该指标衡量答案是否基于检索到的文档生成，采用三分制评分：</p>
+<ul>
+<li><strong>1</strong> ：完全支持：所有答案部分均有来源支撑。</li>
+<li><strong>0</strong> ：部分支持：并非所有答案部分都有来源支撑。</li>
+<li><strong>-1</strong> ：无支持：所有答案部分均无来源支撑。</li>
+</ul>
+<p><img src="/images/image-20250624092742511.png" alt="image-20250624092742511"></p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/multi-agent/">multi-agent</a></div><div class="post-share"><div class="social-share" data-image="/img/Hazel.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img class="cover" src="/img/Hazel.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Causal Estimation of Memorisation Profiles</div></div><div class="info-2"><div class="info-item-1">   收录于 ACL 2024 best papers             ...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Anifled</div><div class="author-info-description">我与我 周旋久</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">Abstract</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">Method</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E6%88%90%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">2.1.</span> <span class="toc-text">合成数据集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAGent-%E6%A1%86%E6%9E%B6"><span class="toc-number">2.2.</span> <span class="toc-text">RAGent 框架</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E7%B3%BB%E7%BB%9F"><span class="toc-number">2.2.1.</span> <span class="toc-text">混合检索系统</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.2.2.</span> <span class="toc-text">多智能体架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Agent1%EF%BC%9APredictor"><span class="toc-number">2.2.2.1.</span> <span class="toc-text">Agent1：Predictor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Agent2%EF%BC%9AJudge"><span class="toc-number">2.2.2.2.</span> <span class="toc-text">Agent2：Judge</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Agent3%EF%BC%9AFinal-Predictor"><span class="toc-number">2.2.2.3.</span> <span class="toc-text">Agent3：Final-Predictor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Agent-4%EF%BC%9AReviser"><span class="toc-number">2.2.2.4.</span> <span class="toc-text">Agent-4：Reviser</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Experiment</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A3%80%E7%B4%A2%E8%AF%84%E4%BC%B0"><span class="toc-number">3.1.</span> <span class="toc-text">检索评估</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%A7%E4%B8%8E%E5%BF%A0%E5%AE%9E%E5%BA%A6%E8%AF%84%E4%BC%B0"><span class="toc-number">3.2.</span> <span class="toc-text">正确性与忠实度评估</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="toc-number">3.2.1.</span> <span class="toc-text">正确性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%A0%E5%AE%9E%E5%BA%A6"><span class="toc-number">3.2.2.</span> <span class="toc-text">忠实度</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/06/23/RAGentA/" title="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering"/></a><div class="content"><a class="title" href="/2025/06/23/RAGentA/" title="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering">RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering</a><time datetime="2025-06-23T09:17:16.000Z" title="发表于 2025-06-23 17:17:16">2025-06-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal Estimation of Memorisation Profiles"/></a><div class="content"><a class="title" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles">Causal Estimation of Memorisation Profiles</a><time datetime="2025-06-11T12:33:39.000Z" title="发表于 2025-06-11 20:33:39">2025-06-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal-Guided Active Learning for Debiasing Large Language Models"/></a><div class="content"><a class="title" href="/2025/06/10/cal/" title="Causal-Guided Active Learning for Debiasing Large Language Models">Causal-Guided Active Learning for Debiasing Large Language Models</a><time datetime="2025-06-10T08:25:52.000Z" title="发表于 2025-06-10 16:25:52">2025-06-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models"/></a><div class="content"><a class="title" href="/2025/06/09/Gain-Guided/" title="Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models">Information Gain-Guided Causal Intervention for Autonomous Debiasing Large Language Models</a><time datetime="2025-06-09T01:52:17.000Z" title="发表于 2025-06-09 09:52:17">2025-06-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue"/></a><div class="content"><a class="title" href="/2025/06/05/Dialogue/" title="Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue">Position Debiasing Fine-Tuning for Causal Perception in Long-Term Dialogue</a><time datetime="2025-06-05T04:28:02.000Z" title="发表于 2025-06-05 12:28:02">2025-06-05</time></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgb(219,255,253);"><div id="footer-wrap"><div class="copyright">&copy;2025 By Anifled</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text">作者：<strong>anifled</strong>，转载请注明作者。<a target="_blank" rel="noopener" href="https://github.com/anifled12138">GitHub</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
