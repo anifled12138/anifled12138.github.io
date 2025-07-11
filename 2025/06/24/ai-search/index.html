@@ -1,0 +1,286 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Towards AI Search Paradigm | To be or not to be</title><meta name="author" content="Anifled"><meta name="copyright" content="Anifled"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="收录于 arxiv                Abstract 本文介绍了“AI搜索范式”（AI Search Paradigm），这是一个面向下一代搜索引擎的全面蓝图，旨在模拟人类的信息处理与决策能力。该范式采用模块化架构，包含四个由大语言模型驱动的智能代理（Master、Planner、Executor 和 Writer），能够动态适应各种信息需求，从简单的事实性查询到复杂的多阶段推">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Towards AI Search Paradigm">
+<meta property="og:url" content="http://anifled12138.github.io/2025/06/24/ai-search/index.html">
+<meta property="og:site_name" content="To be or not to be">
+<meta property="og:description" content="收录于 arxiv                Abstract 本文介绍了“AI搜索范式”（AI Search Paradigm），这是一个面向下一代搜索引擎的全面蓝图，旨在模拟人类的信息处理与决策能力。该范式采用模块化架构，包含四个由大语言模型驱动的智能代理（Master、Planner、Executor 和 Writer），能够动态适应各种信息需求，从简单的事实性查询到复杂的多阶段推">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://anifled12138.github.io/img/Hazel.jpg">
+<meta property="article:published_time" content="2025-06-24T11:47:28.000Z">
+<meta property="article:modified_time" content="2025-07-11T12:50:59.838Z">
+<meta property="article:author" content="Anifled">
+<meta property="article:tag" content="multi-agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://anifled12138.github.io/img/Hazel.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Towards AI Search Paradigm",
+  "url": "http://anifled12138.github.io/2025/06/24/ai-search/",
+  "image": "http://anifled12138.github.io/img/Hazel.jpg",
+  "datePublished": "2025-06-24T11:47:28.000Z",
+  "dateModified": "2025-07-11T12:50:59.838Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Anifled",
+      "url": "http://anifled12138.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/bitbug_favicon.ico"><link rel="canonical" href="http://anifled12138.github.io/2025/06/24/ai-search/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Towards AI Search Paradigm',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/background.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/Hazel.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">To be or not to be</span></a><a class="nav-page-title" href="/"><span class="site-name">Towards AI Search Paradigm</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Java/"><span> Java</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Python/"><span> Python</span></a></div><div class="menus_item"><a class="site-page" href="/categories/Papers/"><span> Papers</span></a></div><div class="menus_item"><a class="site-page" href="/categories/LeetCode/"><span> LeetCode</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Towards AI Search Paradigm</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-06-24T11:47:28.000Z" title="发表于 2025-06-24 19:47:28">2025-06-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-07-11T12:50:59.838Z" title="更新于 2025-07-11 20:50:59">2025-07-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Papers/">Papers</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div>
+  <span style="float: left;">收录于 <strong><em>arxiv</em></strong></span>
+  <a href="https://arxiv.org/pdf/2506.17188" target="_blank" style="float: right;">
+    <img src="/images/icons8-pdf-40.png" alt="PDF" width="40">
+  </a>
+  <div style="clear: both;"></div>
+</div>
+<h1>Abstract</h1>
+<p>本文介绍了“AI搜索范式”（AI Search Paradigm），这是一个面向下一代搜索引擎的全面蓝图，旨在模拟人类的信息处理与决策能力。该范式采用模块化架构，包含四个由大语言模型驱动的智能代理（Master、Planner、Executor 和 Writer），能够动态适应各种信息需求，从简单的事实性查询到复杂的多阶段推理任务。这些代理通过协调一致的工作流程进行协作，评估查询复杂度，将问题分解为可执行的计划，并调度工具使用、任务执行和内容生成。</p>
+<h2 id="AI搜索范式的核心代理角色">AI搜索范式的核心代理角色</h2>
+<p>该范式包含四个关键代理：</p>
+<ul>
+<li><strong>Master Agent（主控代理）</strong> ：作为最初接触点，负责分析用户查询以评估其复杂度和意图。根据问题的性质和难度，Master动态协调并组建合适的后续代理团队。这是本范式区别于传统IR系统（仅采用静态查询理解模块）和RAG系统（初始查询分析通常导致固定处理流水线）的独特之处。此外，Master还持续评估下属代理的表现；在任务失败时，进行反思分析并指导团队重新规划与执行。</li>
+<li><strong>Planner Agent（规划代理）</strong> ：仅在处理需要多步推理或多信息源收集的复杂查询时被调用。Planner从概念化的MCP服务器平台中选择相应工具，动态调整LLMs的能力边界。随后，Planner将整体查询分解为结构化的可管理子任务序列，表示为有向无环图（DAG）。这一步骤涉及如何解决问题的战略规划。尽管高级RAG系统可能执行查询分解或多跳推理，Planner生成具有子任务依赖关系和潜在工具绑定的全面显式DAG的功能，展现出比标准RAG系统更灵活、更具前瞻性的规划能力。</li>
+<li><strong>Executor Agent（执行代理）</strong> ：负责执行简单查询或Planner定义的各个子任务。其关键职责之一是从MCP服务器平台中调用Planner选定的外部工具，以收集信息或执行必要计算。同时评估这些执行的结果。传统IR系统执行内部算法，尽管某些RAG模型可以使用工具，但Executor在管理来自DAG衍生子任务的多样化工具、结果评估及回退机制方面，展现了比一般RAG系统更稳健、更协调的执行层。</li>
+<li><strong>Writer Agent（撰写代理）</strong> ：工作流程中的最后一个代理，负责综合所有已完成子任务的信息和结果。其目标是生成一个连贯、富含上下文且可能多视角回应用户原始查询的内容，包括必要的过滤和消歧。尽管RAG系统的生成组件也合成答案，但AI搜索范式中的Writer旨在处理来自各种计划子任务的结构化和多样化输入，力求实现比从平面文档列表生成更全面、更对话式的综合效果。</li>
+</ul>
+<h1>系统概述</h1>
+<p><img src="../images/image-20250625190432612.png" alt="image-20250625190432612"></p>
+<h2 id="代理角色细节">代理角色细节</h2>
+<ul>
+<li><strong>Master</strong> ：在AI搜索系统中，Master代理充当团队协调者。它负责分析用户的输入查询以评估其复杂性和意图，并组装一个适当的专门代理团队来处理任务——而不直接参与下游查询处理本身。具体来说，Master代理分析输入查询及相关上下文信息，以评估其复杂性并确定最佳团队配置。对于相对简单的查询，它可能会分配仅涉及Writer或Executor和Writer组合的最小设置。对于更复杂的查询，它会启动一个更大的团队，其中包括Planner代理，以执行任务分解和规划，从而逐步解决查询。此外，Master持续监控下属代理的性能。在任务失败的情况下，它进行反思分析并指导团队重新规划和执行。</li>
+<li><strong>Planner</strong> ：该代理<strong>仅用于需要多步推理或信息收集的复杂查询</strong>，并负责对复杂查询做出反应的任务分解和战略规划，使AI搜索系统能够通过一系列更简单、结构化的子任务来解决它们。其核心功能是从MCP平台中选择相应的工具，以动态调整LLM的能力边界，并生成一个编码全局任务计划的DAG，其中每个节点代表一个原子且可调度的子任务，每条边捕捉从Planner的推理过程中得出的子任务之间的条件依赖关系。此外，当Master评估子任务存在执行错误或缺乏关键数据时，在Master的指导下，Planner会对DAG进行重新配置。</li>
+<li><strong>Executor</strong> ：在任务执行阶段，Executor在执行任务和评估其结果方面起着核心作用，确保成功完成并符合预定义的要求。每个子任务要么预先分配了一个外部工具，要么以“无工具”配置处理，仅由Executor使用其自身内置能力处理。在执行过程中，Executor可以根据任务复杂性反复调用已分配的工具，同时不断评估累积输出是否足以满足子任务的目标。一旦评估表明要求得到满足，当前输出将被返回；否则，执行将继续迭代。在分配的工具无响应或失败的情况下，系统会无缝切换到同一工具模块内的功能等效备份工具，从而保持执行连续性和鲁棒性。例如，考虑一个需要通过网络搜索工具获取相关知识的子任务。Executor使用基于当前子任务生成的子查询调用绑定的网络搜索工具，并根据需要执行多轮搜索。每次搜索后，它都会评估检索到的文档，以确定信息是否足够支持此子任务的事实或上下文需求。如果没有，这些子查询将被优化并重新调用工具。一旦实现足够的覆盖范围，结果将被最终确定并返回。通过这种方法，Executor有效地将执行和质量控制结合在一个统一机制中，确保子任务的鲁棒、准确和上下文感知执行。</li>
+<li><strong>Writer</strong> ：该代理负责综合从所有已完成的先前子任务中收集的信息和结果，并生成对用户查询的最终响应。其目标是生成一个连贯、上下文丰富且可能多视角的响应，包括必要的过滤和消歧。在此过程中，它识别多个子任务输出之间的语义关系和逻辑结构，并使用预定义模板或自适应结构策略重新组织信息。这使得Writer能够生成连贯、有条理且易于理解的响应。当子任务结果之间存在冗余或语义不一致时，Writer执行内容过滤和消歧，以确保最终输出准确且不含误导信息。除了回答核心查询外，生成的响应还包含必要的背景和解释内容，从而提高答案的完整性并增强整体用户满意度。</li>
+</ul>
+<h2 id="work-flow">work flow</h2>
+<p>AI搜索系统采用三种不同的团队配置来支持不同级别的推理和执行：</p>
+<ol>
+<li>仅Writer配置</li>
+<li>包含Executor配置</li>
+<li>增强型Planner配置</li>
+</ol>
+<ul>
+<li><strong>仅Writer配置</strong> ：这种配置适用于可以直接基于系统（LLM）的推理能力和内部知识回答的简单查询。在这种情况下，Master分析查询并确定不需要外部工具调用或任务分解。然后直接将任务委托给Writer，后者仅依靠其内置的生成能力生成响应。例如，对于查询“汉武帝的名字是什么？”，Master将提示转发给Writer，后者直接生成响应：“汉武帝的名字是刘彻。”</li>
+<li><strong>包含Executor的配置</strong> ：这种配置处理<strong>需要来自外部来源的事实信息但不涉及多步推理或分解的中等复杂度查询</strong>。Master确定查询可以通过单步执行解决，并直接将其分配给Executor。同时，AI搜索系统使用查询语义以及从团队配置中派生的上下文线索来查询MCP服务器平台，检索出一组聚焦且语义相关的工具。Executor从该子集中选择排名最高的工具并调用它来执行任务。获得结果后，它评估输出是否满足任务要求。一旦执行完成，输出将转发给Writer，后者合成最终响应。例如，给定查询“北京今天的天气适合外出吗？”，Executor调用检索到的天气查询工具，获取实时天气数据，并在验证其完整性后将结果传递给Writer。响应可能是：“北京今天天气晴朗，温度范围在12°C至25°C之间。适合户外活动，尽管建议采取防紫外线措施。”</li>
+<li><strong>增强型Planner配置</strong> ：这种配置专为需要多步推理和结构化任务执行的复杂查询而设计。当检测到高查询复杂度时，Master将控制权委托给Planner，启动基于规划的工作流程。同时，Planner的工具选择通过查询MCP服务器平台进行支持，根据输入查询和当前执行上下文检索出经过语义过滤的候选工具集。Planner将查询分解为一系列原子子任务，并将它们组织成一个捕获其逻辑和执行依赖关系的DAG。对于每个子任务，从检索到的工具子集中选择合适的工具并显式绑定到相应节点。Executor随后逐层遍历DAG，调用绑定工具并评估中间结果。一旦所有子任务完成，聚合的输出将传递给Writer，后者将其合成为连贯且上下文感知的最终响应。例如，考虑一个复杂查询“汉武帝和凯撒大帝谁年纪更大？相差多少年？”。在这种情况下，Master将查询委托给Planner，后者负责规划并将查询分解为三个具体的子任务，每个子任务关联候选工具集中的特定工具：
+<ul>
+<li>子任务1：搜索汉武帝的出生日期。使用网络搜索工具。</li>
+<li>子任务2：搜索凯撒大帝的出生日期。使用网络搜索工具。</li>
+<li>子任务3：计算两个出生日期之间的差异。使用程序员工具。</li>
+</ul>
+</li>
+</ul>
+<p>​	这些子任务根据其执行依赖关系被结构化为一个DAG，并由Executor顺序执行。一旦所有结果收集完毕，Writer将其合成为连贯且上下文准确的响应：“汉武帝（公元前156年—公元前87年）大约活了69年，而尤利乌斯·凯撒（公元前100年—公元前44年）大约活了56年。因此，汉武帝比凯撒大约13岁。”</p>
+<p><img src="../images/image-20250625190841839.png" alt="image-20250625190841839"></p>
+<h1>Task Planner</h1>
+<p>Planner（规划代理）负责将复杂查询分解为结构化的子任务，并通过适当的工具协调执行过程。与依赖静态检索和固定响应生成的传统系统不同，Planner支持动态任务规划、多工具的有效管理以及自适应决策能力。</p>
+<p>对于复杂查询的解析来说，一个专门的Planner是不可或缺的。不同于以往仅依赖检索或上下文内分解的RAG系统，Planner能够显式地将查询分解为细粒度的子任务，通过DAG确定它们的逻辑依赖关系，并在简单检索之外动态选择合适的工具进行任务执行。</p>
+<p>Planner具备重新规划的能力；如果任何中间结果偏离预期目标，在Master的指导下，Planner可以相应地调整任务计划。这些能力从根本上扩展了检索增强系统的范围，使其从被动的“检索-生成”流水线转变为“推理、规划、执行与再规划”的主动AI搜索系统。</p>
+<h2 id="任务宇宙与MCP">任务宇宙与MCP</h2>
+<p>早期的工具增强型LLM系统依赖于特定供应商的“函数调用”JSON模式，如OpenAI提出的方式，并迅速被许多框架复制。虽然这些临时性的接口简单易用，但它们绑定于单一提供者，缺乏机器类型保证，也使得独立代理之间无法共享工具或跨组织边界合理评估成本、延迟或安全性。对于AI搜索系统而言，Planner需要在一个多步骤计划中协调异构的知识查找、计算和转换，这种碎片化成为重大瓶颈。</p>
+<h3 id="模型-上下文协议（MCP）">模型-上下文协议（MCP）</h3>
+<p>MCP通过指定一种供应商无关的HTTP+JSON-RPC接口解决了这一碎片化问题，使服务器能够以安全、类型化的方式暴露工具和数据，同时客户端（即LLM或代理）能够发现、调用并监控这些工具。</p>
+<p>该协议包含：</p>
+<ol>
+<li><strong>清单（Manifest）</strong> ：声明每个端点的名称、语义角色、成本和延迟上限；</li>
+<li><strong>机器可读的输入/输出模式</strong> ：为LLM的函数调用标记提供基础；</li>
+<li><strong>能力握手（Capability Handshake）</strong> ：用于工具发现；</li>
+<li><strong>执行契约（Execution Contract）</strong> ：确保幂等、可审计的调用。</li>
+</ol>
+<h2 id="动态能力边界">动态能力边界</h2>
+<p>给定用户的输入查询和MCP服务器，将Planner使用的LLM与可用工具集合定义为能力边界，该边界包含LLM的推理能力、内置知识，以及网络搜索、计算器、程序员等功能。</p>
+<p>一旦定义了能力边界，AI搜索系统就可以根据输入查询生成定制化的计划。具体来说，Planner构建一个DAG，其中每个节点代表一个单独的子任务（即一次工具调用），边则表示两个节点之间的依赖关系。这样就能确保任何任务只有在其所有前置任务完成后才被执行。</p>
+<p>随着可用工具API数量的几何级增长，静态能力边界的表达能力终将被超越。为应对这一挑战，AI搜索范式在任务规划阶段引入了一个新概念——<strong>动态能力边界（Dynamic Capability Boundary）</strong> 。</p>
+<p>AI搜索系统利用LLM处理输入查询，并在短时间内选择一个潜在的工具子集。给定选定的工具子集后，AI搜索系统将其与LLM的推理能力和内置知识结合，构成新的动态能力边界。</p>
+<p><img src="../images/image-20250625205429261.png" alt="image-20250625205429261"></p>
+<h3 id="工具API文档的优化">工具API文档的优化</h3>
+<p>为了提高工具文档的质量，AI搜索系统采用了一种迭代优化方法<strong>DRAFT</strong> ，该方法利用LLMs与外部工具之间的交互以及这些交互过程中产生的反馈，逐步优化工具文档。</p>
+<p>DRAFT包含三个迭代阶段：</p>
+<ol>
+<li><strong>经验收集（Experience Gathering）</strong></li>
+<li><strong>从经验中学习（Learning from Experience）</strong></li>
+<li><strong>文档重写（Documentation Rewriting）</strong></li>
+</ol>
+<p>具体来说，DRAFT首先系统性地模拟多样化的使用场景，涵盖典型交互、边缘案例、错误场景和参数极限。这种详尽的探索性交互揭示了现有工具描述中的缺陷和不准确之处。随后，DRAFT分析收集到的交互数据，以识别文档中的不一致和模糊之处。从实际工具交互中获得的洞察确保了优化内容紧密贴合实际使用场景。这一分析过程产生了有针对性的改进建议，旨在纠正错误、澄清歧义并消除冗余。最终，DRAFT整合这些建议，合成出经过优化的工具描述，专门针对LLMs的有效理解进行了优化。该方法结合了促进多样化探索覆盖和自适应终止标准的策略，以防止过度迭代，确保文档简洁且全面。</p>
+<h3 id="MCP中的工具聚类">MCP中的工具聚类</h3>
+<p>不同用途的工具可能会被归为一类，而功能相似的工具却未被关联。这种不精确的分类增加了任务执行的复杂性并降低了系统的可靠性。</p>
+<p>在实际场景中，当某个工具在执行过程中失败时，系统往往缺乏具有等效功能的替代工具。这种功能冗余的缺失导致更高的错误率和更低的鲁棒性，特别是在任务复杂或环境不确定的情况下。</p>
+<p>使用k-means++算法，将嵌入空间划分为k个不同的簇。</p>
+<p>这种功能聚类对于确保系统的弹性至关重要。当某个工具API在执行过程中失败时，预先分组的替代工具允许立即替换为功能相似的工具API。通过实现自动分类，系统减少了对手工标注的依赖，同时提升了工具API组织的可扩展性和精确性。</p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/multi-agent/">multi-agent</a></div><div class="post-share"><div class="social-share" data-image="/img/Hazel.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/06/23/RAGentA/" title="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering"><img class="cover" src="/img/Hazel.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering</div></div><div class="info-2"><div class="info-item-1">   收录于 SIGIR 2025                Abstract 一个用于可归因问答（attributed question answering, QA）的多智能体检索增强生成（Retrieval-Augmented Generation, RAG）框架。以生成可信答案为目标，RAGentA 专注于优化答案的正确性，包括对问题的覆盖性和相关性，以及“忠实度”（faithfulness），即答案在多大程度上基于检索到的文档。 RAGentA 使用一种多智能体架构，通过迭代筛选检索文档、生成带有内联引用的答案，并通过动态优化验证其完整性。该框架的核心是一种结合稀疏与密集方法的混合检索策略，相比最佳单一检索模型，其 Recall@20 提升了 12.5%，从而产生更正确且有更好支持的答案。 主要工作：  提出了 RAGentA ，一个协同的多智能体 RAG 框架，通过细粒度归因提升答案的忠实度，尤其适用于多源问题。 通过结合稀疏与密集检索的方法确保高质量检索，并通过基于智能体的相关性评分选择最适合生成的文档。 构建了一个多样化的合成 QA 数据集，基于...</div></div></div></a><a class="pagination-related" href="/2025/07/10/mamo/" title="Mitigating Social Bias in Large Language Models: A Multi-Objective Approach Within a Multi-Agent Framework"><img class="cover" src="/img/Hazel.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Mitigating Social Bias in Large Language Models: A Multi-Objective Approach Within a Multi-Agent Framework</div></div><div class="info-2"><div class="info-item-1">   收录于 AAAI2025                 开源代码 数据集：Bias Benchmark for QA (BBQ)和StereoSet 模型：GPT-3.5-Turbo-0125和Llama-3-8B-Instruct Motivation  依赖白盒 LLMs 的技术（如数据增强、参数调优、解码策略等），虽有效但不适用于许多闭源 LLMs。 使用自然语言指令引导 LLMs 符合伦理，缺乏可解释性和透明度，且在解决偏见的范围上有局限，还常导致性能显著下降。 链式思维（CoT）方法虽能增强透明度和偏见处理范围，但可能无意中放大偏见；融入人类价值观或指令的方法也存在性能权衡问题。   METHOD MOMA...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/06/23/RAGentA/" title="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering"><img class="cover" src="/img/Hazel.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-23</div><div class="info-item-2">RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering</div></div><div class="info-2"><div class="info-item-1">   收录于 SIGIR 2025                Abstract 一个用于可归因问答（attributed question answering, QA）的多智能体检索增强生成（Retrieval-Augmented Generation, RAG）框架。以生成可信答案为目标，RAGentA 专注于优化答案的正确性，包括对问题的覆盖性和相关性，以及“忠实度”（faithfulness），即答案在多大程度上基于检索到的文档。 RAGentA 使用一种多智能体架构，通过迭代筛选检索文档、生成带有内联引用的答案，并通过动态优化验证其完整性。该框架的核心是一种结合稀疏与密集方法的混合检索策略，相比最佳单一检索模型，其 Recall@20 提升了 12.5%，从而产生更正确且有更好支持的答案。 主要工作：  提出了 RAGentA ，一个协同的多智能体 RAG 框架，通过细粒度归因提升答案的忠实度，尤其适用于多源问题。 通过结合稀疏与密集检索的方法确保高质量检索，并通过基于智能体的相关性评分选择最适合生成的文档。 构建了一个多样化的合成 QA 数据集，基于...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/1749020983551.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Anifled</div><div class="author-info-description">我与我 周旋久</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">Abstract</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#AI%E6%90%9C%E7%B4%A2%E8%8C%83%E5%BC%8F%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%90%86%E8%A7%92%E8%89%B2"><span class="toc-number">1.1.</span> <span class="toc-text">AI搜索范式的核心代理角色</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">系统概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%90%86%E8%A7%92%E8%89%B2%E7%BB%86%E8%8A%82"><span class="toc-number">2.1.</span> <span class="toc-text">代理角色细节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#work-flow"><span class="toc-number">2.2.</span> <span class="toc-text">work flow</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">Task Planner</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%AE%87%E5%AE%99%E4%B8%8EMCP"><span class="toc-number">3.1.</span> <span class="toc-text">任务宇宙与MCP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B-%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8D%8F%E8%AE%AE%EF%BC%88MCP%EF%BC%89"><span class="toc-number">3.1.1.</span> <span class="toc-text">模型-上下文协议（MCP）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%83%BD%E5%8A%9B%E8%BE%B9%E7%95%8C"><span class="toc-number">3.2.</span> <span class="toc-text">动态能力边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7API%E6%96%87%E6%A1%A3%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-number">3.2.1.</span> <span class="toc-text">工具API文档的优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MCP%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E8%81%9A%E7%B1%BB"><span class="toc-number">3.2.2.</span> <span class="toc-text">MCP中的工具聚类</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/07/11/idobata/" title="A Multi-Agent Probabilistic Inference Framework Inspired by Kairanban-Style CoT System with IdoBata Conversation for Debiasing"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="A Multi-Agent Probabilistic Inference Framework Inspired by Kairanban-Style CoT System with IdoBata Conversation for Debiasing"/></a><div class="content"><a class="title" href="/2025/07/11/idobata/" title="A Multi-Agent Probabilistic Inference Framework Inspired by Kairanban-Style CoT System with IdoBata Conversation for Debiasing">A Multi-Agent Probabilistic Inference Framework Inspired by Kairanban-Style CoT System with IdoBata Conversation for Debiasing</a><time datetime="2025-07-11T13:06:50.000Z" title="发表于 2025-07-11 21:06:50">2025-07-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/07/10/mamo/" title="Mitigating Social Bias in Large Language Models: A Multi-Objective Approach Within a Multi-Agent Framework"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Mitigating Social Bias in Large Language Models: A Multi-Objective Approach Within a Multi-Agent Framework"/></a><div class="content"><a class="title" href="/2025/07/10/mamo/" title="Mitigating Social Bias in Large Language Models: A Multi-Objective Approach Within a Multi-Agent Framework">Mitigating Social Bias in Large Language Models: A Multi-Objective Approach Within a Multi-Agent Framework</a><time datetime="2025-07-10T03:17:05.000Z" title="发表于 2025-07-10 11:17:05">2025-07-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/24/ai-search/" title="Towards AI Search Paradigm"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Towards AI Search Paradigm"/></a><div class="content"><a class="title" href="/2025/06/24/ai-search/" title="Towards AI Search Paradigm">Towards AI Search Paradigm</a><time datetime="2025-06-24T11:47:28.000Z" title="发表于 2025-06-24 19:47:28">2025-06-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/23/RAGentA/" title="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering"/></a><div class="content"><a class="title" href="/2025/06/23/RAGentA/" title="RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering">RAGentA: Multi-Agent Retrieval-Augmented Generation for Attributed Question Answering</a><time datetime="2025-06-23T09:17:16.000Z" title="发表于 2025-06-23 17:17:16">2025-06-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles"><img src="/img/Hazel.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Causal Estimation of Memorisation Profiles"/></a><div class="content"><a class="title" href="/2025/06/11/Causal-Estimation/" title="Causal Estimation of Memorisation Profiles">Causal Estimation of Memorisation Profiles</a><time datetime="2025-06-11T12:33:39.000Z" title="发表于 2025-06-11 20:33:39">2025-06-11</time></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgb(219,255,253);"><div id="footer-wrap"><div class="copyright">&copy;2025 By Anifled</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text">作者：<strong>anifled</strong>，转载请注明作者。<a target="_blank" rel="noopener" href="https://github.com/anifled12138">GitHub</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
